@@ -1,5 +1,62 @@
+const ADD = 0, SUB = 1, RIGHT = 2, LEFT = 3, OUT = 4, IN = 5,
+  OPEN = 6, CLOSE = 7;
+
+function* parseProgram(programString) {
+  for (let opCode of programString) {
+    switch (opCode) {
+      case '+':
+        yield {type: ADD, x: 1};
+        break;
+      case '-':
+        yield {type: SUB, x: 1};
+        break;
+      case '>':
+        yield {type: RIGHT, x: 1};
+        break;
+      case '<':
+        yield {type: LEFT, x: 1};
+        break;
+      case '.':
+        yield {type: OUT};
+        break;
+      case ',':
+        yield {type: IN};
+        break;
+      case '[':
+        yield {type: OPEN};
+        break;
+      case ']':
+        yield {type: CLOSE};
+        break;
+    }
+  }
+}
+
+function* contractProgram(program) {
+  let prev;
+  for (let ins of program) {
+    if (!prev) {
+      prev = ins;
+    } else {
+      if (prev.type === ins.type && prev.x) {
+        prev.x += ins.x;
+      } else {
+        yield prev;
+        prev = ins;
+      }
+    }
+  }
+  if (prev) {
+    yield prev;
+  }
+}
+
+function parseAndOptimizeProgram(programString) {
+  return Array.from(contractProgram(parseProgram(programString)));
+}
+
 export default class Machine {
-  constructor(program, read, write, options={}) {
+  constructor(programString, read, write, options={}) {
     if (read[Symbol.iterator]) {
       const iter = read[Symbol.iterator]();
       read = () => {
@@ -10,7 +67,7 @@ export default class Machine {
 
     this._cellSize = options.cellSize || 16;
     this._cellCount = options.cellCount || 4096;
-    this._program = program;
+    this._program = parseAndOptimizeProgram(programString);
     this._read = read;
     this._write = write;
     if (this._cellSize === 16) {
@@ -38,50 +95,49 @@ export default class Machine {
         this._complete = true;
         break;
       }
-      const opCode = this._program[this._pc];
-      //console.log('on opcode', this._pc, opCode);
-      switch (opCode) {
-        case '+':
-          this._memory[this._dc]++;
+      const ins = this._program[this._pc];
+      switch (ins.type) {
+        case ADD:
+          this._memory[this._dc] += ins.x|0;
           break;
-        case '-':
-          this._memory[this._dc]--;
+        case SUB:
+          this._memory[this._dc] -= ins.x|0;
           break;
-        case '>':
-          this._dc++;
+        case RIGHT:
+          this._dc += ins.x|0;
           break;
-        case '<':
-          this._dc--;
+        case LEFT:
+          this._dc -= ins.x|0;
           break;
-        case '.':
+        case OUT:
           this._write(this._memory[this._dc]|0);
           break;
-        case ',':
+        case IN:
           const value = this._read();
           this._memory[this._dc] = value === null ? this._EOF|0 : value|0;
           break;
-        case '[':
+        case OPEN:
           if (this._memory[this._dc] === 0) {
             let openCount = 1;
             while (++this._pc < programLen && openCount > 0) {
-              let currentOpCode = this._program[this._pc];
-              if (currentOpCode === '[') {
+              let currentOpCode = this._program[this._pc].type;
+              if (currentOpCode === OPEN) {
                 openCount++;
-              } else if (currentOpCode === ']') {
+              } else if (currentOpCode === CLOSE) {
                 openCount--;
               }
             }
             this._pc--;
           }
           break;
-        case ']':
+        case CLOSE:
           if (this._memory[this._dc] !== 0) {
             let openCount = 1;
             while (--this._pc > 0 && openCount > 0) {
-              let currentOpCode = this._program[this._pc];
-              if (currentOpCode === ']') {
+              let currentOpCode = this._program[this._pc].type;
+              if (currentOpCode === CLOSE) {
                 openCount++;
-              } else if (currentOpCode === '[') {
+              } else if (currentOpCode === OPEN) {
                 openCount--;
               }
             }
