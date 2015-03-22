@@ -64,57 +64,131 @@ describe('parse', function() {
 });
 
 describe('serialize', function() {
-  it('add', function() {
-    assert.strictEqual(serialize([{type: ADD, x: 3}]), '+++');
-  });
+  describe('normal', function() {
+    it('add', function() {
+      assert.strictEqual(serialize([{type: ADD, x: 3}]), '+++');
+    });
 
-  it('sub', function() {
-    assert.strictEqual(serialize([{type: ADD, x: -3}]), '---');
-  });
+    it('sub', function() {
+      assert.strictEqual(serialize([{type: ADD, x: -3}]), '---');
+    });
 
-  it('right', function() {
-    assert.strictEqual(serialize([{type: RIGHT, x: 3}]), '>>>');
-  });
+    it('right', function() {
+      assert.strictEqual(serialize([{type: RIGHT, x: 3}]), '>>>');
+    });
 
-  it('left', function() {
-    assert.strictEqual(serialize([{type: RIGHT, x: -3}]), '<<<');
-  });
+    it('left', function() {
+      assert.strictEqual(serialize([{type: RIGHT, x: -3}]), '<<<');
+    });
 
-  it('in and out', function() {
-    assert.strictEqual(serialize([
-      {type: OUT}, {type: OUT},
-      {type: IN}, {type: IN}, {type: IN}
-    ]), '..,,,');
-  });
+    it('in and out', function() {
+      assert.strictEqual(serialize([
+        {type: OUT}, {type: OUT},
+        {type: IN}, {type: IN}, {type: IN}
+      ]), '..,,,');
+    });
 
-  it('clear', function() {
-    assert.strictEqual(serialize([{type: CLEAR}]), '[-]');
-  });
+    it('clear', function() {
+      assert.strictEqual(serialize([{type: CLEAR}]), '[-]');
+    });
 
-  it('mul', function() {
-    assert.strictEqual(serialize([
-      {type: MUL, x: -1, y: 2},
-      {type: MUL, x: 2, y: 3},
-      {type: CLEAR}
-    ]), '[-<++>>>+++<<]');
-  });
-
-  it('improper mul', function() {
-    assert.throws(() => {
-      serialize([
+    it('mul', function() {
+      assert.strictEqual(serialize([
         {type: MUL, x: -1, y: 2},
         {type: MUL, x: 2, y: 3},
-        {type: OUT}, {type: OUT},
         {type: CLEAR}
-      ]);
+      ]), '[-<++>>>+++<<]');
+    });
+
+    it('improper mul', function() {
+      assert.throws(() => {
+        serialize([
+          {type: MUL, x: -1, y: 2},
+          {type: MUL, x: 2, y: 3},
+          {type: OUT}, {type: OUT},
+          {type: CLEAR}
+        ]);
+      });
+    });
+
+    it('scan_left', function() {
+      assert.strictEqual(serialize([{type: SCAN_LEFT}]), '[<]');
+    });
+
+    it('scan_right', function() {
+      assert.strictEqual(serialize([{type: SCAN_RIGHT}]), '[>]');
     });
   });
 
-  it('scan_left', function() {
-    assert.strictEqual(serialize([{type: SCAN_LEFT}]), '[<]');
-  });
+  describe('enhanced', function() {
+    it('single add', function() {
+      assert.strictEqual(serialize([{type: ADD, x: 1}], true), '+');
+    });
 
-  it('scan_right', function() {
-    assert.strictEqual(serialize([{type: SCAN_RIGHT}]), '[>]');
+    it('add', function() {
+      assert.strictEqual(serialize([{type: ADD, x: 3}], true), '3+');
+    });
+
+    it('single sub', function() {
+      assert.strictEqual(serialize([{type: ADD, x: -1}], true), '-');
+    });
+
+    it('sub', function() {
+      assert.strictEqual(serialize([{type: ADD, x: -3}], true), '3-');
+    });
+
+    it('single right', function() {
+      assert.strictEqual(serialize([{type: RIGHT, x: 1}], true), '>');
+    });
+
+    it('right', function() {
+      assert.strictEqual(serialize([{type: RIGHT, x: 3}], true), '3>');
+    });
+
+    it('single left', function() {
+      assert.strictEqual(serialize([{type: RIGHT, x: -1}], true), '<');
+    });
+
+    it('left', function() {
+      assert.strictEqual(serialize([{type: RIGHT, x: -3}], true), '3<');
+    });
+
+    it('in and out', function() {
+      assert.strictEqual(serialize([
+        {type: OUT}, {type: OUT},
+        {type: IN}, {type: IN}, {type: IN}
+      ], true), '..,,,');
+    });
+
+    it('clear', function() {
+      assert.strictEqual(serialize([{type: CLEAR}], true), '^');
+    });
+
+    it('mul', function() {
+      assert.strictEqual(serialize([
+        {type: MUL, x: -1, y: 2},
+        {type: MUL, x: 2, y: 3},
+        {type: CLEAR}
+      ], true), '(1),2*2,3*^');
+    });
+
+    it('improper mul', function() {
+      assert.throws(() => {
+        serialize([
+          {type: MUL, x: -1, y: 2},
+          {type: MUL, x: 2, y: 3},
+          {type: OUT}, {type: OUT},
+          {type: CLEAR}
+        ], true);
+      });
+    });
+
+    it('scan_left', function() {
+      assert.strictEqual(serialize([{type: SCAN_LEFT}], true), '!');
+    });
+
+    it('scan_right', function() {
+      assert.strictEqual(serialize([{type: SCAN_RIGHT}], true), '@');
+    });
   });
 });
