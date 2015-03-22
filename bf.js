@@ -78,7 +78,7 @@ function* clearLoop(program) {
         copyBuffer.length = 0;
         copyPos = 0;
       }
-    } else if (buffer.length >= 2) {
+    } else {
       if (ins.type === CLOSE && copyPos === 0) {
         yield* copyBuffer;
         yield {type: CLEAR};
@@ -98,11 +98,9 @@ function* clearLoop(program) {
         copyBuffer.length = 0;
         copyPos = 0;
       }
-    } else {
-      throw new Error(
-        "clearLoop buffer should not hold this many items: "+buffer.length);
     }
   }
+  yield* buffer;
 }
 
 function parseAndOptimizeProgram(programString) {
