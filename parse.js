@@ -40,9 +40,9 @@ function* tokenize(programString) {
 
 function parseEnhancedNumber(x) {
   const hasStartParen = _.first(x) === '(';
-  const hasEndParent = _.last(x) === ')';
-  if (hasStartParen !== hasEndParent) {
-    throw new Error("Parent mismatch: "+x);
+  const hasEndParen = _.last(x) === ')';
+  if (hasStartParen !== hasEndParen) {
+    throw new Error("Paren mismatch: "+x);
   }
   if (hasStartParen) {
     return -x.slice(1, -1);
