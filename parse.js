@@ -252,7 +252,7 @@ export function loopAssociater(program) {
   return program;
 }
 
-export default function parse(programString, enhanced=false) {
+export function parse(programString, enhanced=false) {
   if (typeof programString !== 'string') {
     throw new Error("argument must be string");
   }

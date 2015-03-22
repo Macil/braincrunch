@@ -18,7 +18,7 @@ function formatEnhancedNumber(x) {
   }
 }
 
-export default function serialize(program, enhanced=false) {
+export function serialize(program, enhanced=false) {
   const mulBuffer = [];
   const bf = [];
   for (let ins of program) {

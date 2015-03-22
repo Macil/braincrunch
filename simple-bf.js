@@ -1,4 +1,4 @@
-import parse from './parse';
+import {parse} from './parse';
 
 const ADD = 0, RIGHT = 1,
   OUT = 2, IN = 3,

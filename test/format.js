@@ -1,7 +1,7 @@
 import assert from 'assert';
 
-import parse from '../parse';
-import serialize from '../serialize';
+import {parse} from '../parse';
+import {serialize} from '../serialize';
 
 const ADD = 0, RIGHT = 1,
   OUT = 2, IN = 3,
