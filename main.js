@@ -23,15 +23,16 @@ const ROT13 = '-,+[-[>>++++[>++++++++<-]<+<-[>+>+>-[>>>]<[[>+<-]>>+>]<<<<<-]' +
   ']>>[<+>-]>[-[-<<[-]>>]<<[<<->>-]>>]<<[<<+>>-]]<[-]<.[-]<-,+]';
 
 const FACTOR = fs.readFileSync(__dirname+'/../bfoptimization/progs/factor.b', 'utf8');
+const DBFI = fs.readFileSync(__dirname+'/../bfoptimization/progs/dbfi.b', 'utf8');
 const LONG = fs.readFileSync(__dirname+'/../bfoptimization/progs/long.b', 'utf8');
 const HANOI = fs.readFileSync(__dirname+'/../bfoptimization/progs/hanoi.b', 'utf8');
 const AWIB = fs.readFileSync(__dirname+'/../bfoptimization/progs/awib-0.4.b', 'utf8');
 
 function main() {
   const {result, timeSpent} = benchmark(() => {
-    const mac = new Machine(HANOI, toCharCodes(''), n => {
+    const mac = new Machine(FACTOR, toCharCodes('133333333333337\n'), n => {
       process.stdout.write(String.fromCharCode(n));
-    }, {EOF: -1});
+    }, {EOF: -1, cellSize: 8});
     return mac.run();
   }, 0);
   console.log('cycles', result);

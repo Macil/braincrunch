@@ -140,53 +140,61 @@ export default class Machine {
   }
 
   run(steps=Infinity) {
-    const programLen = this._program.length;
+    const program = this._program;
+    const memory = this._memory;
+    const EOF = this._EOF|0;
+    const read = this._read;
+    const write = this._write;
+    let dc = this._dc|0;
+    let pc = this._pc|0;
+
+    const programLen = program.length;
     let step = 0;
     while (step < steps) {
-      if (this._pc >= programLen) {
+      if (pc >= programLen) {
         this._complete = true;
         break;
       }
-      const ins = this._program[this._pc];
+      const ins = program[pc];
       switch (ins.type) {
         case ADD:
-          this._memory[this._dc] += ins.x|0;
+          memory[dc] += ins.x|0;
           break;
         case CLEAR:
-          this._memory[this._dc] = 0;
+          memory[dc] = 0;
           break;
         case MUL:
-          this._memory[this._dc + ins.x|0] += this._memory[this._dc] * ins.y|0;
+          memory[dc + ins.x|0] += memory[dc] * ins.y|0;
           break;
         case RIGHT:
-          this._dc += ins.x|0;
+          dc += ins.x|0;
           break;
         case OUT:
-          this._write(this._memory[this._dc]|0);
+          write(memory[dc]|0);
           break;
         case IN:
-          const value = this._read();
-          this._memory[this._dc] = value === null ? this._EOF|0 : value|0;
+          const value = read();
+          memory[dc] = value === null ? EOF : value|0;
           break;
         case OPEN:
-          if (this._memory[this._dc] === 0) {
+          if (memory[dc] === 0) {
             let openCount = 1;
-            while (++this._pc < programLen && openCount > 0) {
-              let currentOpCode = this._program[this._pc].type;
+            while (++pc < programLen && openCount > 0) {
+              let currentOpCode = program[pc].type;
               if (currentOpCode === OPEN) {
                 openCount++;
               } else if (currentOpCode === CLOSE) {
                 openCount--;
               }
             }
-            this._pc--;
+            pc--;
           }
           break;
         case CLOSE:
-          if (this._memory[this._dc] !== 0) {
+          if (memory[dc] !== 0) {
             let openCount = 1;
-            while (--this._pc > 0 && openCount > 0) {
-              let currentOpCode = this._program[this._pc].type;
+            while (--pc > 0 && openCount > 0) {
+              let currentOpCode = program[pc].type;
               if (currentOpCode === CLOSE) {
                 openCount++;
               } else if (currentOpCode === OPEN) {
@@ -196,9 +204,13 @@ export default class Machine {
           }
           break;
       }
-      this._pc++;
+      pc++;
       step++;
     }
+
+    this._dc = dc;
+    this._pc = pc;
+
     return step;
   }
 }
