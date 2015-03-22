@@ -228,7 +228,7 @@ function* scanners(program) {
 }
 
 // Must be last optimization
-function loopAssociater(program) {
+export function loopAssociater(program) {
   program = Array.from(program);
   const programLen = program.length;
   const opens = [];
