@@ -24,15 +24,16 @@ const ROT13 = '-,+[-[>>++++[>++++++++<-]<+<-[>+>+>-[>>>]<[[>+<-]>>+>]<<<<<-]' +
 
 const FACTOR = fs.readFileSync(__dirname+'/../bfoptimization/progs/factor.b', 'utf8');
 const LONG = fs.readFileSync(__dirname+'/../bfoptimization/progs/long.b', 'utf8');
+const HANOI = fs.readFileSync(__dirname+'/../bfoptimization/progs/hanoi.b', 'utf8');
 const AWIB = fs.readFileSync(__dirname+'/../bfoptimization/progs/awib-0.4.b', 'utf8');
 
 function main() {
   const {result, timeSpent} = benchmark(() => {
-    const mac = new Machine(FACTOR, toCharCodes('65\n'), n => {
+    const mac = new Machine(HANOI, toCharCodes(''), n => {
       process.stdout.write(String.fromCharCode(n));
     }, {EOF: -1});
     return mac.run();
-  }, 10);
+  }, 0);
   console.log('cycles', result);
   console.log('time spent', timeSpent);
 }
