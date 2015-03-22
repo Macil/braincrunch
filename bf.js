@@ -1,8 +1,9 @@
 import _ from 'lodash';
 
-const ADD = 0, SUB = 1, RIGHT = 2, LEFT = 3, OUT = 4, IN = 5,
-  OPEN = 6, CLOSE = 7,
-  CLEAR = 8, MUL = 9;
+const ADD = 0, RIGHT = 1,
+  OUT = 2, IN = 3,
+  OPEN = 4, CLOSE = 5,
+  CLEAR = 6, MUL = 7;
 
 function* parseProgram(programString) {
   for (let opCode of programString) {
@@ -11,13 +12,13 @@ function* parseProgram(programString) {
         yield {type: ADD, x: 1};
         break;
       case '-':
-        yield {type: SUB, x: 1};
+        yield {type: ADD, x: -1};
         break;
       case '>':
         yield {type: RIGHT, x: 1};
         break;
       case '<':
-        yield {type: LEFT, x: 1};
+        yield {type: RIGHT, x: -1};
         break;
       case '.':
         yield {type: OUT};
@@ -35,7 +36,7 @@ function* parseProgram(programString) {
   }
 }
 
-const contractableInsTypes = [ADD, SUB, RIGHT, LEFT];
+const contractableInsTypes = [ADD, RIGHT];
 function* contractProgram(program) {
   let prev;
   for (let ins of program) {
@@ -68,7 +69,7 @@ function* clearLoop(program) {
         yield ins;
       }
     } else if (buffer.length === 1) {
-      if (ins.type === SUB && ins.x === 1) {
+      if (ins.type === ADD && ins.x === -1) {
         buffer.push(ins);
       } else {
         yield* buffer;
@@ -87,9 +88,6 @@ function* clearLoop(program) {
       } else if (ins.type === RIGHT) {
         buffer.push(ins);
         copyPos += ins.x;
-      } else if (ins.type === LEFT) {
-        buffer.push(ins);
-        copyPos -= ins.x;
       } else if (ins.type === ADD) {
         buffer.push(ins);
         copyBuffer.push({type: MUL, x: copyPos, y: ins.x});
@@ -156,9 +154,6 @@ export default class Machine {
         case ADD:
           this._memory[this._dc] += ins.x|0;
           break;
-        case SUB:
-          this._memory[this._dc] -= ins.x|0;
-          break;
         case CLEAR:
           this._memory[this._dc] = 0;
           break;
@@ -167,9 +162,6 @@ export default class Machine {
           break;
         case RIGHT:
           this._dc += ins.x|0;
-          break;
-        case LEFT:
-          this._dc -= ins.x|0;
           break;
         case OUT:
           this._write(this._memory[this._dc]|0);
