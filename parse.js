@@ -151,7 +151,7 @@ function loopAssociater(program) {
       opens.push(pc);
     } else if (ins.type === CLOSE) {
       const openPc = opens.pop();
-      if (!openPc) {
+      if (openPc == null) {
         throw new Error("Unmatched ]");
       }
       ins.pair = openPc;
