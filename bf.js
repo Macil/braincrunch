@@ -1,5 +1,6 @@
 const ADD = 0, SUB = 1, RIGHT = 2, LEFT = 3, OUT = 4, IN = 5,
-  OPEN = 6, CLOSE = 7;
+  OPEN = 6, CLOSE = 7,
+  CLEAR = 8;
 
 function* parseProgram(programString) {
   for (let opCode of programString) {
@@ -51,8 +52,37 @@ function* contractProgram(program) {
   }
 }
 
+function* clearLoop(program) {
+  const buffer = [];
+  for (let ins of program) {
+    if (buffer.length === 0) {
+      if (ins.type === OPEN) {
+        buffer.push(ins);
+      } else {
+        yield ins;
+      }
+    } else if (buffer.length === 1) {
+      if (ins.type === SUB && ins.x === 1) {
+        buffer.push(ins);
+      } else {
+        yield* buffer;
+        yield ins;
+        buffer.length = 0;
+      }
+    } else /* buffer.length === 2 */ {
+      if (ins.type === CLOSE) {
+        yield {type: CLEAR};
+      } else {
+        yield* buffer;
+        yield ins;
+      }
+      buffer.length = 0;
+    }
+  }
+}
+
 function parseAndOptimizeProgram(programString) {
-  return Array.from(contractProgram(parseProgram(programString)));
+  return Array.from(contractProgram(clearLoop(parseProgram(programString))));
 }
 
 export default class Machine {
@@ -102,6 +132,9 @@ export default class Machine {
           break;
         case SUB:
           this._memory[this._dc] -= ins.x|0;
+          break;
+        case CLEAR:
+          this._memory[this._dc] = 0;
           break;
         case RIGHT:
           this._dc += ins.x|0;
