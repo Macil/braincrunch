@@ -161,36 +161,28 @@ function* clearLoop(program) {
   }
 
   for (let ins of program) {
-    if (buffer.length === 0) {
+    if (buffer.length && !hasMinus && copyPos === 0 && ins.type === ADD && ins.x === -1) {
+      buffer.push(ins);
+      hasMinus = true;
+    } else if (buffer.length && hasMinus && ins.type === CLOSE && copyPos === 0) {
+      yield* mulBuffer;
+      yield {type: CLEAR};
+      buffer.length = 0;
+      mulBuffer.length = 0;
+      copyPos = 0;
+      hasMinus = false;
+    } else if (buffer.length && ins.type === RIGHT) {
+      buffer.push(ins);
+      copyPos += ins.x;
+    } else if (buffer.length && ins.type === ADD && copyPos !== 0) {
+      buffer.push(ins);
+      mulBuffer.push({type: MUL, x: copyPos, y: ins.x});
+    } else {
+      yield* abortBuffer();
       if (ins.type === OPEN) {
         buffer.push(ins);
       } else {
         yield ins;
-      }
-    } else {
-      if (!hasMinus && copyPos === 0 && ins.type === ADD && ins.x === -1) {
-        buffer.push(ins);
-        hasMinus = true;
-      } else if (hasMinus && ins.type === CLOSE && copyPos === 0) {
-        yield* mulBuffer;
-        yield {type: CLEAR};
-        buffer.length = 0;
-        mulBuffer.length = 0;
-        copyPos = 0;
-        hasMinus = false;
-      } else if (ins.type === RIGHT) {
-        buffer.push(ins);
-        copyPos += ins.x;
-      } else if (ins.type === ADD && copyPos !== 0) {
-        buffer.push(ins);
-        mulBuffer.push({type: MUL, x: copyPos, y: ins.x});
-      } else {
-        yield* abortBuffer();
-        if (ins.type === OPEN) {
-          buffer.push(ins);
-        } else {
-          yield ins;
-        }
       }
     }
   }
@@ -206,30 +198,22 @@ function* scanners(program) {
   }
 
   for (let ins of program) {
-    if (buffer.length === 0) {
+    if (buffer.length === 1 && ins.type === RIGHT && (ins.x === 1 || ins.x === -1)) {
+      buffer.push(ins);
+    } else if (buffer.length === 2 && ins.type === CLOSE) {
+      if (buffer[1].x === 1) {
+        yield {type: SCAN_RIGHT};
+      } else {
+        assert.strictEqual(buffer[1].x, -1);
+        yield {type: SCAN_LEFT};
+      }
+      buffer.length = 0;
+    } else {
+      yield* abortBuffer();
       if (ins.type === OPEN) {
         buffer.push(ins);
       } else {
         yield ins;
-      }
-    } else {
-      if (buffer.length === 1 && ins.type === RIGHT && (ins.x === 1 || ins.x === -1)) {
-        buffer.push(ins);
-      } else if (buffer.length === 2 && ins.type === CLOSE) {
-        if (buffer[1].x === 1) {
-          yield {type: SCAN_RIGHT};
-        } else {
-          assert.strictEqual(buffer[1].x, -1);
-          yield {type: SCAN_LEFT};
-        }
-        buffer.length = 0;
-      } else {
-        yield* abortBuffer();
-        if (ins.type === OPEN) {
-          buffer.push(ins);
-        } else {
-          yield ins;
-        }
       }
     }
   }
