@@ -140,8 +140,23 @@ function* scanners(program) {
   yield* buffer;
 }
 
+// Must be last optimization
+function loopAssociater(program) {
+  program = Array.from(program);
+  const programLen = program.length;
+  for (let pc = 0; pc < programLen; pc++) {
+    const ins = program[pc];
+    if (ins.type === OPEN) {
+      ins.pair = openJump(program, pc);
+    } else if (ins.type === CLOSE) {
+      ins.pair = closeJump(program, pc);
+    }
+  }
+  return program;
+}
+
 function parseAndOptimizeProgram(programString) {
-  return Array.from(clearLoop(scanners(contractProgram(parseProgram(programString)))));
+  return Array.from(loopAssociater(clearLoop(scanners(contractProgram(parseProgram(programString))))));
 }
 
 function scanLeft(memory, dc) {
@@ -264,12 +279,12 @@ export default class Machine {
           break;
         case OPEN:
           if (!memory[dc]) {
-            pc = openJump(program, pc);
+            pc = ins.pair|0;
           }
           break;
         case CLOSE:
           if (memory[dc]) {
-            pc = closeJump(program, pc);
+            pc = ins.pair|0;
           }
           break;
       }
