@@ -2,7 +2,7 @@ import _ from 'lodash';
 
 const ADD = 0, SUB = 1, RIGHT = 2, LEFT = 3, OUT = 4, IN = 5,
   OPEN = 6, CLOSE = 7,
-  CLEAR = 8, COPY = 9;
+  CLEAR = 8, MUL = 9;
 
 function* parseProgram(programString) {
   for (let opCode of programString) {
@@ -90,9 +90,9 @@ function* clearLoop(program) {
       } else if (ins.type === LEFT) {
         buffer.push(ins);
         copyPos -= ins.x;
-      } else if (ins.type === ADD && ins.x === 1) {
+      } else if (ins.type === ADD) {
         buffer.push(ins);
-        copyBuffer.push({type: COPY, x: copyPos});
+        copyBuffer.push({type: MUL, x: copyPos, y: ins.x});
       } else {
         yield* buffer;
         yield ins;
@@ -162,8 +162,8 @@ export default class Machine {
         case CLEAR:
           this._memory[this._dc] = 0;
           break;
-        case COPY:
-          this._memory[this._dc + ins.x|0] += this._memory[this._dc];
+        case MUL:
+          this._memory[this._dc + ins.x|0] += this._memory[this._dc] * ins.y|0;
           break;
         case RIGHT:
           this._dc += ins.x|0;
