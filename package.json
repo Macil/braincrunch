@@ -1,0 +1,20 @@
+{
+  "name": "bf",
+  "private": true,
+  "version": "0.0.1",
+  "description": "",
+  "main": "bf.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "babel-runtime": "4.7.16",
+    "lodash": "^3.5.0"
+  },
+  "devDependencies": {
+    "babel": "4.7.16",
+    "mocha": "^2.2.1"
+  }
+}
