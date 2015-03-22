@@ -147,8 +147,16 @@ function* contractProgram(program) {
 // Needs to run after contractProgram for best effectiveness.
 function* clearLoop(program) {
   const buffer = [];
-  const copyBuffer = [];
+  const mulBuffer = [];
   let copyPos = 0;
+
+  function* abortBuffer() {
+    yield* buffer;
+    buffer.length = 0;
+    mulBuffer.length = 0;
+    copyPos = 0;
+  }
+
   for (let ins of program) {
     if (buffer.length === 0) {
       if (ins.type === OPEN) {
@@ -160,35 +168,29 @@ function* clearLoop(program) {
       if (ins.type === ADD && ins.x === -1) {
         buffer.push(ins);
       } else {
-        yield* buffer;
+        yield* abortBuffer();
         yield ins;
-        buffer.length = 0;
-        copyBuffer.length = 0;
-        copyPos = 0;
       }
     } else {
       if (ins.type === CLOSE && copyPos === 0) {
-        yield* copyBuffer;
+        yield* mulBuffer;
         yield {type: CLEAR};
         buffer.length = 0;
-        copyBuffer.length = 0;
+        mulBuffer.length = 0;
         copyPos = 0;
       } else if (ins.type === RIGHT) {
         buffer.push(ins);
         copyPos += ins.x;
       } else if (ins.type === ADD && copyPos !== 0) {
         buffer.push(ins);
-        copyBuffer.push({type: MUL, x: copyPos, y: ins.x});
+        mulBuffer.push({type: MUL, x: copyPos, y: ins.x});
       } else {
-        yield* buffer;
+        yield* abortBuffer();
         yield ins;
-        buffer.length = 0;
-        copyBuffer.length = 0;
-        copyPos = 0;
       }
     }
   }
-  yield* buffer;
+  yield* abortBuffer();
 }
 
 function* scanners(program) {
