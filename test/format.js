@@ -55,6 +55,14 @@ describe('parse', function() {
       ]);
     });
 
+    it("won't multiply with x = 0", function() {
+      assert.deepEqual(Array.from(parse('[-+++]')), [
+        {type: OPEN, pair: 2},
+        {type: ADD, x: 2},
+        {type: CLOSE, pair: 0}
+      ]);
+    });
+
     it('scan_left', function() {
       assert.deepEqual(Array.from(parse('[<]')), [{type: SCAN_LEFT}]);
     });

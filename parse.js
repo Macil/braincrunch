@@ -182,7 +182,7 @@ function* clearLoop(program) {
       } else if (ins.type === RIGHT) {
         buffer.push(ins);
         copyPos += ins.x;
-      } else if (ins.type === ADD) {
+      } else if (ins.type === ADD && copyPos !== 0) {
         buffer.push(ins);
         copyBuffer.push({type: MUL, x: copyPos, y: ins.x});
       } else {
