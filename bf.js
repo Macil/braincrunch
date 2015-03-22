@@ -1,6 +1,8 @@
+import _ from 'lodash';
+
 const ADD = 0, SUB = 1, RIGHT = 2, LEFT = 3, OUT = 4, IN = 5,
   OPEN = 6, CLOSE = 7,
-  CLEAR = 8;
+  CLEAR = 8, COPY = 9;
 
 function* parseProgram(programString) {
   for (let opCode of programString) {
@@ -33,13 +35,14 @@ function* parseProgram(programString) {
   }
 }
 
+const contractableInsTypes = [ADD, SUB, RIGHT, LEFT];
 function* contractProgram(program) {
   let prev;
   for (let ins of program) {
     if (!prev) {
       prev = ins;
     } else {
-      if (prev.type === ins.type && prev.x) {
+      if (prev.type === ins.type && _.includes(contractableInsTypes, ins.type)) {
         prev.x += ins.x;
       } else {
         yield prev;
@@ -52,8 +55,11 @@ function* contractProgram(program) {
   }
 }
 
+// Needs to run after contractProgram for best effectiveness.
 function* clearLoop(program) {
   const buffer = [];
+  const copyBuffer = [];
+  let copyPos = 0;
   for (let ins of program) {
     if (buffer.length === 0) {
       if (ins.type === OPEN) {
@@ -68,21 +74,41 @@ function* clearLoop(program) {
         yield* buffer;
         yield ins;
         buffer.length = 0;
+        copyBuffer.length = 0;
+        copyPos = 0;
       }
-    } else /* buffer.length === 2 */ {
-      if (ins.type === CLOSE) {
+    } else if (buffer.length >= 2) {
+      if (ins.type === CLOSE && copyPos === 0) {
+        yield* copyBuffer;
         yield {type: CLEAR};
+        buffer.length = 0;
+        copyBuffer.length = 0;
+        copyPos = 0;
+      } else if (ins.type === RIGHT) {
+        buffer.push(ins);
+        copyPos += ins.x;
+      } else if (ins.type === LEFT) {
+        buffer.push(ins);
+        copyPos -= ins.x;
+      } else if (ins.type === ADD && ins.x === 1) {
+        buffer.push(ins);
+        copyBuffer.push({type: COPY, x: copyPos});
       } else {
         yield* buffer;
         yield ins;
+        buffer.length = 0;
+        copyBuffer.length = 0;
+        copyPos = 0;
       }
-      buffer.length = 0;
+    } else {
+      throw new Error(
+        "clearLoop buffer should not hold this many items: "+buffer.length);
     }
   }
 }
 
 function parseAndOptimizeProgram(programString) {
-  return Array.from(contractProgram(clearLoop(parseProgram(programString))));
+  return Array.from(clearLoop(contractProgram(parseProgram(programString))));
 }
 
 export default class Machine {
@@ -135,6 +161,9 @@ export default class Machine {
           break;
         case CLEAR:
           this._memory[this._dc] = 0;
+          break;
+        case COPY:
+          this._memory[this._dc + ins.x|0] += this._memory[this._dc];
           break;
         case RIGHT:
           this._dc += ins.x|0;
