@@ -145,14 +145,14 @@ function parseAndOptimizeProgram(programString) {
 }
 
 function scanLeft(memory, dc) {
-  while (memory[dc]|0 !== 0) {
+  while (memory[dc]) {
     dc--;
   }
   return dc;
 }
 
 function scanRight(memory, dc) {
-  while (memory[dc]|0 !== 0) {
+  while (memory[dc]) {
     dc++;
   }
   return dc;
@@ -215,7 +215,7 @@ export default class Machine {
           memory[dc] = 0;
           break;
         case MUL:
-          memory[dc + ins.x|0] += memory[dc] * ins.y|0;
+          memory[dc + (ins.x|0)] += (memory[dc]|0) * (ins.y|0);
           break;
         case RIGHT:
           dc += ins.x|0;
@@ -225,7 +225,7 @@ export default class Machine {
           break;
         case IN:
           const value = read();
-          memory[dc] = value === null ? EOF : value|0;
+          memory[dc] = value === null ? EOF : (value|0);
           break;
         case SCAN_LEFT:
           dc = scanLeft(memory, dc);
@@ -234,7 +234,7 @@ export default class Machine {
           dc = scanRight(memory, dc);
           break;
         case OPEN:
-          if (memory[dc] === 0) {
+          if (!memory[dc]) {
             let openCount = 1;
             while (++pc < programLen && openCount > 0) {
               let currentOpCode = program[pc].type;
@@ -248,7 +248,7 @@ export default class Machine {
           }
           break;
         case CLOSE:
-          if (memory[dc] !== 0) {
+          if (memory[dc]) {
             let openCount = 1;
             while (--pc > 0 && openCount > 0) {
               let currentOpCode = program[pc].type;
