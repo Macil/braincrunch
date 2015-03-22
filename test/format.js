@@ -46,6 +46,18 @@ describe('parse', function() {
       ]);
     });
 
+    it('clear after partial mul', function() {
+      assert.deepEqual(Array.from(parse('[<+>[-]-]')), [
+        {type: OPEN, pair: 6},
+        {type: RIGHT, x: -1},
+        {type: ADD, x: 1},
+        {type: RIGHT, x: 1},
+        {type: CLEAR},
+        {type: ADD, x: -1},
+        {type: CLOSE, pair: 0}
+      ]);
+    });
+
     it('backwards mul', function() {
       assert.deepEqual(Array.from(parse('[<++>>>+++<<-]')), [
         {type: MUL, x: -1, y: 2},
@@ -73,6 +85,14 @@ describe('parse', function() {
 
     it('scan_left', function() {
       assert.deepEqual(Array.from(parse('[<]')), [{type: SCAN_LEFT}]);
+    });
+
+    it('scan_left after partial scanner', function() {
+      assert.deepEqual(Array.from(parse('[[<]]')), [
+        {type: OPEN, pair: 2},
+        {type: SCAN_LEFT},
+        {type: CLOSE, pair: 0}
+      ]);
     });
 
     it('scan_right', function() {

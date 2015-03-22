@@ -1,3 +1,4 @@
+import assert from 'assert';
 import _ from 'lodash';
 
 const ADD = 0, RIGHT = 1,
@@ -185,15 +186,25 @@ function* clearLoop(program) {
         mulBuffer.push({type: MUL, x: copyPos, y: ins.x});
       } else {
         yield* abortBuffer();
-        yield ins;
+        if (ins.type === OPEN) {
+          buffer.push(ins);
+        } else {
+          yield ins;
+        }
       }
     }
   }
-  yield* abortBuffer();
+  yield* buffer;
 }
 
 function* scanners(program) {
   const buffer = [];
+
+  function* abortBuffer() {
+    yield* buffer;
+    buffer.length = 0;
+  }
+
   for (let ins of program) {
     if (buffer.length === 0) {
       if (ins.type === OPEN) {
@@ -201,28 +212,25 @@ function* scanners(program) {
       } else {
         yield ins;
       }
-    } else if (buffer.length === 1) {
-      if (ins.type === RIGHT && (ins.x === 1 || ins.x === -1)) {
+    } else {
+      if (buffer.length === 1 && ins.type === RIGHT && (ins.x === 1 || ins.x === -1)) {
         buffer.push(ins);
-      } else {
-        yield* buffer;
-        yield ins;
-        buffer.length = 0;
-      }
-    } else if (buffer.length === 2) {
-      if (ins.type === CLOSE) {
+      } else if (buffer.length === 2 && ins.type === CLOSE) {
         if (buffer[1].x === 1) {
           yield {type: SCAN_RIGHT};
         } else {
+          assert.strictEqual(buffer[1].x, -1);
           yield {type: SCAN_LEFT};
         }
+        buffer.length = 0;
       } else {
-        yield* buffer;
-        yield ins;
+        yield* abortBuffer();
+        if (ins.type === OPEN) {
+          buffer.push(ins);
+        } else {
+          yield ins;
+        }
       }
-      buffer.length = 0;
-    } else {
-      throw new Error("Should not happen");
     }
   }
   yield* buffer;
