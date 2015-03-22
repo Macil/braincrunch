@@ -72,8 +72,10 @@ describe('parse', function() {
     });
 
     it('ignores enhanced syntax', function() {
-      assert.deepEqual(Array.from(parse('3>>!@4<3:2*^')), [
-        {type: RIGHT, x: 1}
+      assert.deepEqual(Array.from(parse('3>>.4<3:2*^')), [
+        {type: RIGHT, x: 2},
+        {type: OUT},
+        {type: RIGHT, x: -1}
       ]);
     });
 
@@ -140,18 +142,10 @@ describe('parse', function() {
       });
     });
 
-    it('scan_left', function() {
-      assert.deepEqual(Array.from(parse('!', true)), [{type: SCAN_LEFT}]);
-    });
-
-    it('scan_right', function() {
-      assert.deepEqual(Array.from(parse('@', true)), [{type: SCAN_RIGHT}]);
-    });
-
     it('many', function() {
-      assert.deepEqual(Array.from(parse('3>>!@4<3:2*^', true)), [
+      assert.deepEqual(Array.from(parse('3>>.4<3:2*^', true)), [
         {type: RIGHT, x: 4},
-        {type: SCAN_LEFT}, {type: SCAN_RIGHT},
+        {type: OUT},
         {type: RIGHT, x: -4},
         {type: MUL, x: 3, y: 2}, {type: CLEAR}
       ]);
@@ -286,11 +280,11 @@ describe('serialize', function() {
     });
 
     it('scan_left', function() {
-      assert.strictEqual(serialize([{type: SCAN_LEFT}], true), '!');
+      assert.strictEqual(serialize([{type: SCAN_LEFT}], true), '[<]');
     });
 
     it('scan_right', function() {
-      assert.strictEqual(serialize([{type: SCAN_RIGHT}], true), '@');
+      assert.strictEqual(serialize([{type: SCAN_RIGHT}], true), '[>]');
     });
   });
 });

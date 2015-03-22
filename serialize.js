@@ -95,10 +95,10 @@ export default function serialize(program, enhanced=false) {
         mulBuffer.push(ins);
         break;
       case SCAN_LEFT:
-        bf.push(enhanced ? '!' : '[<]');
+        bf.push('[<]');
         break;
       case SCAN_RIGHT:
-        bf.push(enhanced ? '@' : '[>]');
+        bf.push('[>]');
         break;
       default:
         throw new Error("Unknown type: "+ins.type);

@@ -83,12 +83,6 @@ function* enhancedTokenize(programString) {
       case '^':
         yield {type: CLEAR};
         break;
-      case '!':
-        yield {type: SCAN_LEFT};
-        break;
-      case '@':
-        yield {type: SCAN_RIGHT};
-        break;
       case '*':
         throw new Error("* must be preceded by num:num");
       default:
