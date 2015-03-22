@@ -104,7 +104,7 @@ function compile(program, registers, memory, write, read, EOF) {
       case CLEAR:
         return `memory[registers[0]] = 0;`;
       case MUL:
-        return `memory[registers[0] + ${x}] += memory[registers[0]] * ${y};`;
+        return `memory[registers[0] + ${x}] += (memory[registers[0]]|0)${y !== 1 ? ' * '+y : ''};`;
       case RIGHT:
         return `registers[0] += ${x};`;
       case OUT:
