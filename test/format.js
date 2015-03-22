@@ -46,6 +46,14 @@ describe('parse', function() {
       ]);
     });
 
+    it('backwards mul', function() {
+      assert.deepEqual(Array.from(parse('[<++>>>+++<<-]')), [
+        {type: MUL, x: -1, y: 2},
+        {type: MUL, x: 2, y: 3},
+        {type: CLEAR}
+      ]);
+    });
+
     it('improper mul', function() {
       assert.deepEqual(Array.from(parse('[-<++>>>+++<<<]')), [
         {type: OPEN, pair: 7}, {type: ADD, x: -1},

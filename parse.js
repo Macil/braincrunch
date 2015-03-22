@@ -149,12 +149,14 @@ function* clearLoop(program) {
   const buffer = [];
   const mulBuffer = [];
   let copyPos = 0;
+  let hasMinus = false;
 
   function* abortBuffer() {
     yield* buffer;
     buffer.length = 0;
     mulBuffer.length = 0;
     copyPos = 0;
+    hasMinus = false;
   }
 
   for (let ins of program) {
@@ -164,20 +166,17 @@ function* clearLoop(program) {
       } else {
         yield ins;
       }
-    } else if (buffer.length === 1) {
-      if (ins.type === ADD && ins.x === -1) {
-        buffer.push(ins);
-      } else {
-        yield* abortBuffer();
-        yield ins;
-      }
     } else {
-      if (ins.type === CLOSE && copyPos === 0) {
+      if (!hasMinus && copyPos === 0 && ins.type === ADD && ins.x === -1) {
+        buffer.push(ins);
+        hasMinus = true;
+      } else if (hasMinus && ins.type === CLOSE && copyPos === 0) {
         yield* mulBuffer;
         yield {type: CLEAR};
         buffer.length = 0;
         mulBuffer.length = 0;
         copyPos = 0;
+        hasMinus = false;
       } else if (ins.type === RIGHT) {
         buffer.push(ins);
         copyPos += ins.x;
