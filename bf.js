@@ -3,7 +3,8 @@ import _ from 'lodash';
 const ADD = 0, RIGHT = 1,
   OUT = 2, IN = 3,
   OPEN = 4, CLOSE = 5,
-  CLEAR = 6, MUL = 7;
+  CLEAR = 6, MUL = 7,
+  SCAN_LEFT = 8, SCAN_RIGHT = 9;
 
 function* parseProgram(programString) {
   for (let opCode of programString) {
@@ -103,8 +104,44 @@ function* clearLoop(program) {
   yield* buffer;
 }
 
+function* scanners(program) {
+  const buffer = [];
+  for (let ins of program) {
+    if (buffer.length === 0) {
+      if (ins.type === OPEN) {
+        buffer.push(ins);
+      } else {
+        yield ins;
+      }
+    } else if (buffer.length === 1) {
+      if (ins.type === RIGHT && (ins.x === 1 || ins.x === -1)) {
+        buffer.push(ins);
+      } else {
+        yield* buffer;
+        yield ins;
+        buffer.length = 0;
+      }
+    } else if (buffer.length === 2) {
+      if (ins.type === CLOSE) {
+        if (buffer[1].x === 1) {
+          yield {type: SCAN_RIGHT};
+        } else {
+          yield {type: SCAN_LEFT};
+        }
+      } else {
+        yield* buffer;
+        yield ins;
+      }
+      buffer.length = 0;
+    } else {
+      throw new Error("Should not happen");
+    }
+  }
+  yield* buffer;
+}
+
 function parseAndOptimizeProgram(programString) {
-  return Array.from(clearLoop(contractProgram(parseProgram(programString))));
+  return Array.from(clearLoop(scanners(contractProgram(parseProgram(programString)))));
 }
 
 export default class Machine {
@@ -175,6 +212,16 @@ export default class Machine {
         case IN:
           const value = read();
           memory[dc] = value === null ? EOF : value|0;
+          break;
+        case SCAN_LEFT:
+          while (memory[dc]|0 !== 0) {
+            dc--;
+          }
+          break;
+        case SCAN_RIGHT:
+          while (memory[dc]|0 !== 0) {
+            dc++;
+          }
           break;
         case OPEN:
           if (memory[dc] === 0) {
