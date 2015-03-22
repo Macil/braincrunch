@@ -22,16 +22,18 @@ const ROT13 = '-,+[-[>>++++[>++++++++<-]<+<-[>+>+>-[>>>]<[[>+<-]>>+>]<<<<<-]' +
   ']>>>[-]+>--[-[<->+++[-]]]<[++++++++++++<[>-[>+>>]>[+[<+>-]>+>>]<<<<<-' +
   ']>>[<+>-]>[-[-<<[-]>>]<<[<<->>-]>>]<<[<<+>>-]]<[-]<.[-]<-,+]';
 
+const FACTOR = fs.readFileSync(__dirname+'/../bfoptimization/progs/factor.b', 'utf8');
 const LONG = fs.readFileSync(__dirname+'/../bfoptimization/progs/long.b', 'utf8');
+const AWIB = fs.readFileSync(__dirname+'/../bfoptimization/progs/awib-0.4.b', 'utf8');
 
 function main() {
-  const message = 'lol beep boop\nsecret message\nyby orrc obbc\nfrperg zrffntr\n';
-  const {timeSpent} = benchmark(() => {
-    const mac = new Machine(ROT13, toCharCodes(message), n => {
-      //process.stdout.write(String.fromCharCode(n));
+  const {result, timeSpent} = benchmark(() => {
+    const mac = new Machine(FACTOR, toCharCodes('65\n'), n => {
+      process.stdout.write(String.fromCharCode(n));
     }, {EOF: -1});
-    mac.run();
-  }, 100);
+    return mac.run();
+  }, 10);
+  console.log('cycles', result);
   console.log('time spent', timeSpent);
 }
 
