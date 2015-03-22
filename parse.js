@@ -164,6 +164,7 @@ function loopAssociater(program) {
   return program;
 }
 
-export default function parse(programString) {
-  return loopAssociater(clearLoop(scanners(contractProgram(tokenize(programString)))));
+export default function parse(programString, enhanced=false) {
+  const tokens = tokenize(programString);
+  return loopAssociater(clearLoop(scanners(contractProgram(tokens))));
 }

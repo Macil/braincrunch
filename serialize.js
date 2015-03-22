@@ -76,7 +76,7 @@ export default function serialize(program, enhanced=false) {
       case CLEAR:
         if (enhanced) {
           for (let mul of mulBuffer) {
-            bf.push(formatEnhancedNumber(mul.x)+','+formatEnhancedNumber(mul.y)+'*');
+            bf.push(formatEnhancedNumber(mul.x)+':'+formatEnhancedNumber(mul.y)+'*');
           }
           bf.push('^');
         } else {

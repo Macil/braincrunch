@@ -10,56 +10,64 @@ const ADD = 0, RIGHT = 1,
   SCAN_LEFT = 8, SCAN_RIGHT = 9;
 
 describe('parse', function() {
-  it('add', function() {
-    assert.deepEqual(Array.from(parse('+++')), [{type: ADD, x: 3}]);
-  });
+  describe('normal', function() {
+    it('add', function() {
+      assert.deepEqual(Array.from(parse('+++')), [{type: ADD, x: 3}]);
+    });
 
-  it('sub', function() {
-    assert.deepEqual(Array.from(parse('---')), [{type: ADD, x: -3}]);
-  });
+    it('sub', function() {
+      assert.deepEqual(Array.from(parse('---')), [{type: ADD, x: -3}]);
+    });
 
-  it('right', function() {
-    assert.deepEqual(Array.from(parse('>>>')), [{type: RIGHT, x: 3}]);
-  });
+    it('right', function() {
+      assert.deepEqual(Array.from(parse('>>>')), [{type: RIGHT, x: 3}]);
+    });
 
-  it('left', function() {
-    assert.deepEqual(Array.from(parse('<<<')), [{type: RIGHT, x: -3}]);
-  });
+    it('left', function() {
+      assert.deepEqual(Array.from(parse('<<<')), [{type: RIGHT, x: -3}]);
+    });
 
-  it('in and out', function() {
-    assert.deepEqual(Array.from(parse('..,,,')), [
-      {type: OUT}, {type: OUT},
-      {type: IN}, {type: IN}, {type: IN}
-    ]);
-  });
+    it('in and out', function() {
+      assert.deepEqual(Array.from(parse('..,,,')), [
+        {type: OUT}, {type: OUT},
+        {type: IN}, {type: IN}, {type: IN}
+      ]);
+    });
 
-  it('clear', function() {
-    assert.deepEqual(Array.from(parse('[-]')), [{type: CLEAR}]);
-  });
+    it('clear', function() {
+      assert.deepEqual(Array.from(parse('[-]')), [{type: CLEAR}]);
+    });
 
-  it('mul', function() {
-    assert.deepEqual(Array.from(parse('[-<++>>>+++<<]')), [
-      {type: MUL, x: -1, y: 2},
-      {type: MUL, x: 2, y: 3},
-      {type: CLEAR}
-    ]);
-  });
+    it('mul', function() {
+      assert.deepEqual(Array.from(parse('[-<++>>>+++<<]')), [
+        {type: MUL, x: -1, y: 2},
+        {type: MUL, x: 2, y: 3},
+        {type: CLEAR}
+      ]);
+    });
 
-  it('improper mul', function() {
-    assert.deepEqual(Array.from(parse('[-<++>>>+++<<<]')), [
-      {type: OPEN, pair: 7}, {type: ADD, x: -1},
-      {type: RIGHT, x: -1}, {type: ADD, x: 2},
-      {type: RIGHT, x: 3}, {type: ADD, x: 3},
-      {type: RIGHT, x: -3}, {type: CLOSE, pair: 0}
-    ]);
-  });
+    it('improper mul', function() {
+      assert.deepEqual(Array.from(parse('[-<++>>>+++<<<]')), [
+        {type: OPEN, pair: 7}, {type: ADD, x: -1},
+        {type: RIGHT, x: -1}, {type: ADD, x: 2},
+        {type: RIGHT, x: 3}, {type: ADD, x: 3},
+        {type: RIGHT, x: -3}, {type: CLOSE, pair: 0}
+      ]);
+    });
 
-  it('scan_left', function() {
-    assert.deepEqual(Array.from(parse('[<]')), [{type: SCAN_LEFT}]);
-  });
+    it('scan_left', function() {
+      assert.deepEqual(Array.from(parse('[<]')), [{type: SCAN_LEFT}]);
+    });
 
-  it('scan_right', function() {
-    assert.deepEqual(Array.from(parse('[>]')), [{type: SCAN_RIGHT}]);
+    it('scan_right', function() {
+      assert.deepEqual(Array.from(parse('[>]')), [{type: SCAN_RIGHT}]);
+    });
+
+    it('ignores enhanced syntax', function() {
+      assert.deepEqual(Array.from(parse('3>>!@4<3:2*^')), [
+        {type: RIGHT, x: 1}
+      ]);
+    });
   });
 });
 
@@ -169,7 +177,7 @@ describe('serialize', function() {
         {type: MUL, x: -1, y: 2},
         {type: MUL, x: 2, y: 3},
         {type: CLEAR}
-      ], true), '(1),2*2,3*^');
+      ], true), '(1):2*2:3*^');
     });
 
     it('improper mul', function() {
