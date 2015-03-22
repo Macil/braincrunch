@@ -158,6 +158,35 @@ function scanRight(memory, dc) {
   return dc;
 }
 
+function openJump(program, pc) {
+  const programLen = program.length;
+  let openCount = 1;
+  while (++pc < programLen && openCount > 0) {
+    const currentOpCode = program[pc].type;
+    if (currentOpCode === OPEN) {
+      openCount++;
+    } else if (currentOpCode === CLOSE) {
+      openCount--;
+    }
+  }
+  pc--;
+  return pc;
+}
+
+function closeJump(program, pc) {
+  const programLen = program.length;
+  let openCount = 1;
+  while (--pc > 0 && openCount > 0) {
+    const currentOpCode = program[pc].type;
+    if (currentOpCode === CLOSE) {
+      openCount++;
+    } else if (currentOpCode === OPEN) {
+      openCount--;
+    }
+  }
+  return pc;
+}
+
 export default class Machine {
   constructor(programString, read, write, options={}) {
     if (read[Symbol.iterator]) {
@@ -235,29 +264,12 @@ export default class Machine {
           break;
         case OPEN:
           if (!memory[dc]) {
-            let openCount = 1;
-            while (++pc < programLen && openCount > 0) {
-              let currentOpCode = program[pc].type;
-              if (currentOpCode === OPEN) {
-                openCount++;
-              } else if (currentOpCode === CLOSE) {
-                openCount--;
-              }
-            }
-            pc--;
+            pc = openJump(program, pc);
           }
           break;
         case CLOSE:
           if (memory[dc]) {
-            let openCount = 1;
-            while (--pc > 0 && openCount > 0) {
-              let currentOpCode = program[pc].type;
-              if (currentOpCode === CLOSE) {
-                openCount++;
-              } else if (currentOpCode === OPEN) {
-                openCount--;
-              }
-            }
+            pc = closeJump(program, pc);
           }
           break;
       }
