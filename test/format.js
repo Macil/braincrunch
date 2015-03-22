@@ -126,6 +126,12 @@ describe('parse', function() {
       ]);
     });
 
+    it("can't multiply with x = 0", function() {
+      assert.throws(() => {
+        parse('0:3*^', true);
+      });
+    });
+
     it('scan_left', function() {
       assert.deepEqual(Array.from(parse('!', true)), [{type: SCAN_LEFT}]);
     });

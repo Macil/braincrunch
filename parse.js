@@ -95,11 +95,12 @@ function* enhancedTokenize(programString) {
         const slice = programString.substr(i, 500);
         const mulMatch = slice.match(/^(\(?\d+\)?):(\(?\d+\)?)\*/);
         if (mulMatch) {
-          yield {
-            type: MUL,
-            x: parseEnhancedNumber(mulMatch[1]),
-            y: parseEnhancedNumber(mulMatch[2]),
-          };
+          const x = parseEnhancedNumber(mulMatch[1]);
+          const y = parseEnhancedNumber(mulMatch[2]);
+          if (x === 0) {
+            throw new Error("mul instruction can't be used with x=0");
+          }
+          yield {type: MUL, x, y};
           i += mulMatch[0].length-1;
           break;
         }
