@@ -65,19 +65,24 @@ function compile(program, registers, memory, write, read, EOF) {
   // registers[1]: pc
   function INS_CLEAR() {
     memory[registers[0]] = 0;
+    return 1;
   }
   function INS_OUT() {
     write(memory[registers[0]]|0);
+    return 1;
   }
   function INS_IN() {
     const value = read();
     memory[registers[0]] = value === null ? EOF : (value|0);
+    return 1;
   }
   function INS_SCAN_LEFT() {
     registers[0] = scanLeft(memory, registers[0]);
+    return 1;
   }
   function INS_SCAN_RIGHT() {
     registers[0] = scanRight(memory, registers[0]);
+    return 1;
   }
 
   function newFn(src) {
@@ -85,9 +90,8 @@ function compile(program, registers, memory, write, read, EOF) {
     const fn = new Function(
       'registers', 'memory', 'program', 'write', 'read', 'EOF',
       'scanLeft', 'scanRight', src);
-    return () => {
+    return () =>
       fn(registers, memory, program, write, read, EOF, scanLeft, scanRight);
-    };
   }
 
   function toSrc(ins) {
@@ -126,6 +130,7 @@ function compile(program, registers, memory, write, read, EOF) {
       case ADD:
         return () => {
           memory[registers[0]] += x;
+          return 1;
         };
       case CLEAR:
         return INS_CLEAR;
@@ -133,10 +138,12 @@ function compile(program, registers, memory, write, read, EOF) {
         return () => {
           const dc = registers[0];
           memory[dc + x] += (memory[dc]|0) * y;
+          return 1;
         };
       case RIGHT:
         return () => {
           registers[0] += x;
+          return 1;
         };
       case OUT:
         return INS_OUT;
@@ -151,15 +158,21 @@ function compile(program, registers, memory, write, read, EOF) {
           if (!memory[registers[0]]) {
             registers[1] = pair;
           }
+          return 1;
         };
       case CLOSE:
         return () => {
           if (memory[registers[0]]) {
             registers[1] = pair;
           }
+          return 1;
         };
       case MANY:
-        return newFn(ins.items.map(toSrc).join('\n'));
+        return newFn(
+          ins.items.map(toSrc)
+            .concat([`return ${ins.items.length};`])
+            .join('\n')
+        );
       default:
         throw new Error("Unknown instruction type: "+ins.type);
     }
@@ -215,9 +228,8 @@ export default class Machine {
         break;
       }
       const ins = program[registers[1]];
-      ins();
+      step += ins();
       registers[1]++;
-      step++;
     }
 
     return step;
