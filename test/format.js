@@ -68,6 +68,86 @@ describe('parse', function() {
         {type: RIGHT, x: 1}
       ]);
     });
+
+    it('does not use // comments', function() {
+      assert.deepEqual(Array.from(parse('+//+\n+')), [
+        {type: ADD, x: 3}
+      ]);
+    });
+  });
+
+  describe('enhanced', function() {
+    it('add', function() {
+      assert.deepEqual(Array.from(parse('3+', true)), [{type: ADD, x: 3}]);
+    });
+
+    it('add negative', function() {
+      assert.deepEqual(Array.from(parse('(3)+', true)), [{type: ADD, x: -3}]);
+    });
+
+    it('sub', function() {
+      assert.deepEqual(Array.from(parse('3-', true)), [{type: ADD, x: -3}]);
+    });
+
+    it('right', function() {
+      assert.deepEqual(Array.from(parse('3>', true)), [{type: RIGHT, x: 3}]);
+    });
+
+    it('right negative', function() {
+      assert.deepEqual(Array.from(parse('(3)>', true)), [{type: RIGHT, x: -3}]);
+    });
+
+    it('left', function() {
+      assert.deepEqual(Array.from(parse('3<', true)), [{type: RIGHT, x: -3}]);
+    });
+
+    it('in and out', function() {
+      assert.deepEqual(Array.from(parse('..,,,', true)), [
+        {type: OUT}, {type: OUT},
+        {type: IN}, {type: IN}, {type: IN}
+      ]);
+    });
+
+    it('clear', function() {
+      assert.deepEqual(Array.from(parse('^', true)), [{type: CLEAR}]);
+    });
+
+    it('regular clear', function() {
+      assert.deepEqual(Array.from(parse('^[-]', true)), [
+        {type: CLEAR}, {type: CLEAR}
+      ]);
+    });
+
+    it('mul', function() {
+      assert.deepEqual(Array.from(parse('(1):2*2:3*^', true)), [
+        {type: MUL, x: -1, y: 2},
+        {type: MUL, x: 2, y: 3},
+        {type: CLEAR}
+      ]);
+    });
+
+    it('scan_left', function() {
+      assert.deepEqual(Array.from(parse('!', true)), [{type: SCAN_LEFT}]);
+    });
+
+    it('scan_right', function() {
+      assert.deepEqual(Array.from(parse('@', true)), [{type: SCAN_RIGHT}]);
+    });
+
+    it('many', function() {
+      assert.deepEqual(Array.from(parse('3>>!@4<3:2*^', true)), [
+        {type: RIGHT, x: 4},
+        {type: SCAN_LEFT}, {type: SCAN_RIGHT},
+        {type: RIGHT, x: -4},
+        {type: MUL, x: 3, y: 2}, {type: CLEAR}
+      ]);
+    });
+
+    it('uses // comments', function() {
+      assert.deepEqual(Array.from(parse('+//+\n+', true)), [
+        {type: ADD, x: 2}
+      ]);
+    });
   });
 });
 

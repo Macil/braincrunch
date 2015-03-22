@@ -37,6 +37,98 @@ function* tokenize(programString) {
   }
 }
 
+function parseEnhancedNumber(x) {
+  const hasStartParen = _.first(x) === '(';
+  const hasEndParent = _.last(x) === ')';
+  if (hasStartParen !== hasEndParent) {
+    throw new Error("Parent mismatch: "+x);
+  }
+  if (hasStartParen) {
+    return -x.slice(1, -1);
+  } else {
+    return +x;
+  }
+}
+
+function* enhancedTokenize(programString) {
+  programString = programString.replace(/\/\/.*/g, '');
+
+  for (let i = 0; i < programString.length; i++) {
+    const opCode = programString[i];
+    switch (opCode) {
+      case '+':
+        yield {type: ADD, x: 1};
+        break;
+      case '-':
+        yield {type: ADD, x: -1};
+        break;
+      case '>':
+        yield {type: RIGHT, x: 1};
+        break;
+      case '<':
+        yield {type: RIGHT, x: -1};
+        break;
+      case '.':
+        yield {type: OUT};
+        break;
+      case ',':
+        yield {type: IN};
+        break;
+      case '[':
+        yield {type: OPEN};
+        break;
+      case ']':
+        yield {type: CLOSE};
+        break;
+      case '^':
+        yield {type: CLEAR};
+        break;
+      case '!':
+        yield {type: SCAN_LEFT};
+        break;
+      case '@':
+        yield {type: SCAN_RIGHT};
+        break;
+      case '*':
+        throw new Error("* must be preceded by num:num");
+      default:
+        const slice = programString.substr(i, 500);
+        const mulMatch = slice.match(/^(\(?\d+\)?):(\(?\d+\)?)\*/);
+        if (mulMatch) {
+          yield {
+            type: MUL,
+            x: parseEnhancedNumber(mulMatch[1]),
+            y: parseEnhancedNumber(mulMatch[2]),
+          };
+          i += mulMatch[0].length-1;
+          break;
+        }
+        const repeatedMatch = slice.match(/^(\(?\d+\)?)([+\-<>])/);
+        if (repeatedMatch) {
+          const num = parseEnhancedNumber(repeatedMatch[1]);
+          switch (repeatedMatch[2]) {
+            case '+':
+              yield {type: ADD, x: num};
+              break;
+            case '-':
+              yield {type: ADD, x: -num};
+              break;
+            case '>':
+              yield {type: RIGHT, x: num};
+              break;
+            case '<':
+              yield {type: RIGHT, x: -num};
+              break;
+            default:
+              throw new Error("Should not happen");
+          }
+          i += repeatedMatch[0].length-1;
+          break;
+        }
+    }
+  }
+}
+
 const contractableInsTypes = [ADD, RIGHT];
 function* contractProgram(program) {
   let prev;
@@ -165,6 +257,9 @@ function loopAssociater(program) {
 }
 
 export default function parse(programString, enhanced=false) {
-  const tokens = tokenize(programString);
+  if (typeof programString !== 'string') {
+    throw new Error("argument must be string");
+  }
+  const tokens = (enhanced ? enhancedTokenize : tokenize)(programString);
   return loopAssociater(clearLoop(scanners(contractProgram(tokens))));
 }
