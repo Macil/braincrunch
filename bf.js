@@ -144,6 +144,20 @@ function parseAndOptimizeProgram(programString) {
   return Array.from(clearLoop(scanners(contractProgram(parseProgram(programString)))));
 }
 
+function scanLeft(memory, dc) {
+  while (memory[dc]|0 !== 0) {
+    dc--;
+  }
+  return dc;
+}
+
+function scanRight(memory, dc) {
+  while (memory[dc]|0 !== 0) {
+    dc++;
+  }
+  return dc;
+}
+
 export default class Machine {
   constructor(programString, read, write, options={}) {
     if (read[Symbol.iterator]) {
@@ -214,14 +228,10 @@ export default class Machine {
           memory[dc] = value === null ? EOF : value|0;
           break;
         case SCAN_LEFT:
-          while (memory[dc]|0 !== 0) {
-            dc--;
-          }
+          dc = scanLeft(memory, dc);
           break;
         case SCAN_RIGHT:
-          while (memory[dc]|0 !== 0) {
-            dc++;
-          }
+          dc = scanRight(memory, dc);
           break;
         case OPEN:
           if (memory[dc] === 0) {

@@ -30,7 +30,7 @@ const AWIB = fs.readFileSync(__dirname+'/../bfoptimization/progs/awib-0.4.b', 'u
 
 function main() {
   const {result, timeSpent} = benchmark(() => {
-    const mac = new Machine(DBFI, toCharCodes(FACTOR+'!2\n'), n => {
+    const mac = new Machine(DBFI, toCharCodes(FACTOR+'!4\n'), n => {
       process.stdout.write(String.fromCharCode(n));
     }, {EOF: -1, cellSize: 8});
     return mac.run();
