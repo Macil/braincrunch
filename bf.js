@@ -144,19 +144,28 @@ function* scanners(program) {
 function loopAssociater(program) {
   program = Array.from(program);
   const programLen = program.length;
+  const opens = [];
   for (let pc = 0; pc < programLen; pc++) {
     const ins = program[pc];
     if (ins.type === OPEN) {
-      ins.pair = openJump(program, pc);
+      opens.push(pc);
     } else if (ins.type === CLOSE) {
-      ins.pair = closeJump(program, pc);
+      const openPc = opens.pop();
+      if (!openPc) {
+        throw new Error("Unmatched ]");
+      }
+      ins.pair = openPc;
+      program[openPc].pair = pc;
     }
+  }
+  if (opens.length) {
+    throw new Error("Unmatched [");
   }
   return program;
 }
 
 function parseAndOptimizeProgram(programString) {
-  return Array.from(loopAssociater(clearLoop(scanners(contractProgram(parseProgram(programString))))));
+  return loopAssociater(clearLoop(scanners(contractProgram(parseProgram(programString)))));
 }
 
 function scanLeft(memory, dc) {
@@ -171,35 +180,6 @@ function scanRight(memory, dc) {
     dc++;
   }
   return dc;
-}
-
-function openJump(program, pc) {
-  const programLen = program.length;
-  let openCount = 1;
-  while (++pc < programLen && openCount > 0) {
-    const currentOpCode = program[pc].type;
-    if (currentOpCode === OPEN) {
-      openCount++;
-    } else if (currentOpCode === CLOSE) {
-      openCount--;
-    }
-  }
-  pc--;
-  return pc;
-}
-
-function closeJump(program, pc) {
-  const programLen = program.length;
-  let openCount = 1;
-  while (--pc > 0 && openCount > 0) {
-    const currentOpCode = program[pc].type;
-    if (currentOpCode === CLOSE) {
-      openCount++;
-    } else if (currentOpCode === OPEN) {
-      openCount--;
-    }
-  }
-  return pc;
 }
 
 export default class Machine {

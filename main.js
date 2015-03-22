@@ -1,6 +1,5 @@
 import fs from 'fs';
 import Machine from './bf';
-import lint from './lint';
 import {benchmark} from './benchmarking';
 
 function fromCharCodes(arr) {
