@@ -20,6 +20,39 @@ import {SimpleMachine} from '../src/simple-machine';
       assert.deepEqual(output, [1, 3, 2]);
     });
 
+    it("can work when eval is not available", sinon.test(function() {
+      {
+        const fakeEval = () => {
+          throw new Error("eval is blocked by test");
+        };
+        this.stub(global, 'eval', fakeEval);
+        this.stub(global, 'Function', fakeEval);
+      }
+      const output = [];
+      const mac = new Ctor({
+        code: '+.++.-.',
+        write: output,
+        noEvalWarning: true
+      });
+      mac.run();
+      assert.deepEqual(output, [1, 3, 2]);
+    }));
+
+    it("can be set to not use eval", sinon.test(function() {
+      this.spy(global, 'Function');
+
+      const output = [];
+      const mac = new Ctor({
+        code: '+.++.-.',
+        write: output,
+        useEval: false
+      });
+      assert(global.Function.notCalled);
+      mac.run();
+      assert.deepEqual(output, [1, 3, 2]);
+      assert(global.Function.notCalled);
+    }));
+
     it("works with Hello World", function() {
       const HELLO_WORLD = '++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>' +
         '.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.';

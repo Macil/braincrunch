@@ -9,6 +9,23 @@ const ADD = 0, RIGHT = 1,
   SCAN_LEFT = 8, SCAN_RIGHT = 9,
   MANY = 100;
 
+// eval/Function might be disabled by Content Security Policy
+function checkEval() {
+  // jshint evil:true
+  let didEval = false;
+  try {
+    didEval = (new Function('return true;'))();
+  } catch(e) {}
+  return didEval;
+}
+
+const warnAboutNoEval = _.once(() => {
+  console.warn(
+    'eval is not available. Braincrunch performance may suffer.\n' +
+    'You can use the noEvalWarning option to disable this message.'
+  );
+});
+
 function scanLeft(memory, dc) {
   while (memory[dc]) {
     dc--;
@@ -61,7 +78,12 @@ function manyfier(program) {
   return loopAssociater(_manyfier(program));
 }
 
-function compile(program, registers, memory, write, read, EOF) {
+function compile(program, registers, memory, write, read, EOF, useEval, noEvalWarning) {
+  const canEval = useEval && checkEval();
+  if (useEval && !canEval && !noEvalWarning) {
+    warnAboutNoEval();
+  }
+
   // registers[0]: dc
   // registers[1]: pc
   function INS_CLEAR() {
@@ -169,11 +191,21 @@ function compile(program, registers, memory, write, read, EOF) {
           return 1;
         };
       case MANY:
-        return newFn(
-          ins.items.map(toSrc)
-            .concat([`return ${ins.items.length};`])
-            .join('\n')
-        );
+        if (canEval) {
+          return newFn(
+            ins.items.map(toSrc)
+              .concat([`return ${ins.items.length};`])
+              .join('\n')
+          );
+        }
+        const fns = ins.items.map(mapper);
+        return () => {
+          const len = fns.length;
+          for (let i=0; i<len; i++) {
+            fns[i]();
+          }
+          return len;
+        };
       default:
         throw new Error("Unknown instruction type: "+ins.type);
     }
@@ -191,10 +223,12 @@ export class Machine {
     this._memory = makeMemory(this._cellSize, this._cellCount);
     this._registers = new Uint32Array(2);
     this._EOF = _.has(options, 'EOF') ? (options.EOF|0) : -1;
+    this._useEval = _.has(options, 'useEval') ? options.useEval : true;
+    this._noEvalWarning = options.noEvalWarning;
     this._complete = false;
     this._program = compile(
       manyfier(parse(options.code)), this._registers, this._memory,
-      this._write, this._read, this._EOF
+      this._write, this._read, this._EOF, this._useEval, this._noEvalWarning
     );
   }
 
