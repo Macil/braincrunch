@@ -1,7 +1,7 @@
 {
   "name": "braincrunch",
   "version": "0.0.1",
-  "description": "An embeddable performant Brainfuck interpreter written in Javascript",
+  "description": "An embeddable performant Brainfuck interpreter",
   "main": "js/index.js",
   "scripts": {
     "prepublish": "babel -ti runtime -d js/ src/",
