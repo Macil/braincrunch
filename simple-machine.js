@@ -1,4 +1,9 @@
+// Simpler alternative Machine implementation. Doesn't do any Javascript
+// compilation. Useful if you need `machine.run` to not over-step at all.
+
+import _ from 'lodash';
 import {parse} from './parse';
+import {makeReadFunction, makeWriteFunction, makeMemory} from './args';
 
 const ADD = 0, RIGHT = 1,
   OUT = 2, IN = 3,
@@ -20,31 +25,17 @@ function scanRight(memory, dc) {
   return dc;
 }
 
-export default class Machine {
-  constructor(programString, read, write, options={}) {
-    if (read[Symbol.iterator]) {
-      const iter = read[Symbol.iterator]();
-      read = () => {
-        const {value, done} = iter.next();
-        return done ? null : value;
-      };
-    }
-
-    this._cellSize = options.cellSize || 16;
+export class SimpleMachine {
+  constructor(options) {
+    this._cellSize = options.cellSize || 8;
     this._cellCount = options.cellCount || 4096;
-    this._program = parse(programString);
-    this._read = read;
-    this._write = write;
-    if (this._cellSize === 16) {
-      this._memory = new Uint16Array(this._cellCount);
-    } else if (this._cellSize === 8) {
-      this._memory = new Uint8Array(this._cellCount);
-    } else {
-      throw new Error("Invalid cell size: "+this._cellSize);
-    }
+    this._read = makeReadFunction(options.read);
+    this._write = makeWriteFunction(options.write);
+    this._memory = makeMemory(this._cellSize, this._cellCount);
     this._pc = 0;
     this._dc = 0;
-    this._EOF = options.EOF|0;
+    this._EOF = _.has(options, 'EOF') ? (options.EOF|0) : -1;
+    this._program = parse(options.code);
     this._complete = false;
   }
 
