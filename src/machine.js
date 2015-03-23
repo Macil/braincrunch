@@ -20,10 +20,12 @@ function checkEval() {
 }
 
 const warnAboutNoEval = _.once(() => {
-  console.warn(
-    'eval is not available. Braincrunch performance may suffer.\n' +
-    'You can use the noEvalWarning option to disable this message.'
-  );
+  if (typeof console !== 'undefined' && console.warn) {
+    console.warn(
+      'eval is not available. Braincrunch performance may suffer.\n' +
+      'You can use the noEvalWarning option to disable this message.'
+    );
+  }
 });
 
 function scanLeft(memory, dc) {
