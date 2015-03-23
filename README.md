@@ -29,6 +29,9 @@ the Javascript VM can apply its own optimizations at runtime.
 Some of the optimization strategies are inspired by this post:
 http://calmerthanyouare.org/2015/01/07/optimizing-brainfuck.html
 
+BrainCrunch can be used in Browsers via a CommonJS bundler such as Browserify.
+Support for Typed Arrays is required. http://caniuse.com/#feat=typedarrays
+
 ## API
 
 ### new braincrunch.Machine(opts)
@@ -44,6 +47,11 @@ http://calmerthanyouare.org/2015/01/07/optimizing-brainfuck.html
   Defaults to 8.
 * `cellCount`: Number of cells to have. Defaults to 4096.
 * `EOF`: Value to set when `,` gives EOF. Defaults to -1.
+* `useEval`: Translate code into Javascript when possible. Defaults to true.
+* `noEvalWarning`: If useEval is true and the Function constructor is not
+  available at run-time (such as because of Content Security Policy
+  restrictions), then a warning will be printed to the console unless this
+  setting is set to true. Defaults to false.
 
 ### machine.run([steps])
 
