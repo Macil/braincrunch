@@ -2,8 +2,9 @@
   "name": "braincrunch",
   "version": "0.0.1",
   "description": "An embeddable performant Brainfuck interpreter written in Javascript",
-  "main": "index.js",
+  "main": "js/index.js",
   "scripts": {
+    "prepublish": "babel -ti runtime -d js/ src/",
     "test": "mocha"
   },
   "author": "Chris Cowan <agentme49@gmail.com>",

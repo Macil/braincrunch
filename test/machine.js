@@ -1,8 +1,8 @@
 import assert from 'assert';
 import sinon from 'sinon';
 
-import {Machine} from '../';
-import {SimpleMachine} from '../simple-machine';
+import {Machine} from '../src/index.js';
+import {SimpleMachine} from '../src/simple-machine';
 
 [Machine, SimpleMachine].forEach(Ctor => {
   describe(Ctor.name, function() {
