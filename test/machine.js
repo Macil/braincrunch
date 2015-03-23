@@ -12,7 +12,9 @@ import {SimpleMachine} from '../src/simple-machine';
         code: '+.++.-.',
         write: output
       });
+      assert.strictEqual(mac.complete, false);
       const cycles = mac.run();
+      assert.strictEqual(mac.complete, true);
       assert.strictEqual(typeof cycles, 'number');
       assert(cycles > 0);
       assert.deepEqual(output, [1, 3, 2]);
@@ -30,6 +32,26 @@ import {SimpleMachine} from '../src/simple-machine';
         }
       });
       mac.run();
+      assert.strictEqual(output.join(''), 'Hello World!\n');
+    });
+
+    it("can be run a few steps at a time", function() {
+      const HELLO_WORLD = '++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>' +
+        '.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.';
+
+      const output = [];
+      const mac = new Ctor({
+        code: HELLO_WORLD,
+        write: n => {
+          output.push(String.fromCharCode(n));
+        }
+      });
+      assert.strictEqual(mac.complete, false);
+      mac.run(10);
+      assert.strictEqual(mac.complete, false);
+      assert.strictEqual(output.join(''), '');
+      mac.run(2000);
+      assert.strictEqual(mac.complete, true);
       assert.strictEqual(output.join(''), 'Hello World!\n');
     });
 
