@@ -59,7 +59,8 @@ Runs the machine for at least the given number of `steps`. `steps` defaults to
 Infinity if not given.  This method can be called multiple times to continue
 running the machine. Giving a finite `steps` value is a useful protection
 against infinite loops in user-supplied programs, or to let the machine pause
-so other things can be done before resuming.
+so other things can be done before resuming. Returns the number of steps that
+were executed.
 
 ### machine.complete
 
