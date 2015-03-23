@@ -1,16 +1,24 @@
 {
   "name": "braincrunch",
   "version": "0.0.1",
-  "description": "",
+  "description": "An embeddable performant Brainfuck interpreter written in Javascript",
   "main": "index.js",
   "scripts": {
     "test": "mocha"
   },
   "author": "Chris Cowan <agentme49@gmail.com>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AgentME/braincrunch.git"
+  },
   "bugs": {
     "url": "https://github.com/AgentME/braincrunch/issues"
   },
+  "keywords": [
+    "brainfuck",
+    "interpreter"
+  ],
   "dependencies": {
     "babel-runtime": "4.7.16",
     "lodash": "^3.5.0"

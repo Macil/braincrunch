@@ -1,7 +1,6 @@
 # BrainCrunch
 
-A embeddable Brainfuck interpreter written in Javascript with a focus on
-performance and determinism.
+An embeddable performant Brainfuck interpreter written in Javascript.
 
     npm install --save braincrunch
 
