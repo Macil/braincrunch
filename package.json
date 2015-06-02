@@ -1,10 +1,10 @@
 {
   "name": "braincrunch",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "An embeddable performant Brainfuck interpreter",
   "main": "js/index.js",
   "scripts": {
-    "prepublish": "babel -ti runtime -d js/ src/",
+    "prepublish": "babel -s inline --optional runtime -d js/ src/",
     "test": "mocha"
   },
   "author": "Chris Cowan <agentme49@gmail.com>",
@@ -21,11 +21,11 @@
     "interpreter"
   ],
   "dependencies": {
-    "babel-runtime": "4.7.16",
-    "lodash": "^3.5.0"
+    "babel-runtime": "^5.4.7",
+    "lodash": "^3.9.0"
   },
   "devDependencies": {
-    "babel": "4.7.16",
+    "babel": "^5.4.7",
     "mocha": "^2.2.1",
     "sinon": "^1.14.1"
   }
