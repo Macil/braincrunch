@@ -68,3 +68,8 @@ were executed.
 ### machine.complete
 
 Boolean property that is set to true once the machine has finished its program.
+
+## Types
+
+[Flow](https://flowtype.org/) type declarations for this module are included!
+If you are using Flow, they won't require any configuration to use.

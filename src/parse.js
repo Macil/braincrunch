@@ -1,3 +1,5 @@
+/* @flow */
+
 import assert from 'assert';
 import includes from 'lodash/includes';
 import first from 'lodash/first';
@@ -8,6 +10,19 @@ const ADD = 0, RIGHT = 1,
   OPEN = 4, CLOSE = 5,
   CLEAR = 6, MUL = 7,
   SCAN_LEFT = 8, SCAN_RIGHT = 9;
+
+export type Instruction =
+  {| type: 0, x: number |} |
+  {| type: 1, x: number |} |
+  {| type: 2 |} |
+  {| type: 3 |} |
+  {| type: 4, pair?: number |} |
+  {| type: 5, pair?: number |} |
+  {| type: 6 |} |
+  {| type: 7, x: number, y: number |} |
+  {| type: 8 |} |
+  {| type: 9 |} |
+  {| type: 100, items: Array<Instruction> |}; // MANY
 
 function* tokenize(programString) {
   for (let opCode of programString) {
@@ -40,14 +55,14 @@ function* tokenize(programString) {
   }
 }
 
-function parseEnhancedNumber(x) {
+function parseEnhancedNumber(x: string): number {
   const hasStartParen = first(x) === '(';
   const hasEndParen = last(x) === ')';
   if (hasStartParen !== hasEndParen) {
     throw new Error('Paren mismatch: '+x);
   }
   if (hasStartParen) {
-    return -x.slice(1, -1);
+    return -Number(x.slice(1, -1));
   } else {
     return +x;
   }
@@ -136,6 +151,9 @@ function* contractProgram(program) {
       prev = ins;
     } else {
       if (prev.type === ins.type && includes(contractableInsTypes, ins.type)) {
+        if (typeof prev.x !== 'number' || typeof ins.x !== 'number') {
+          throw new Error('Should not happen');
+        }
         prev.x += ins.x;
       } else {
         yield prev;
@@ -224,7 +242,7 @@ function* scanners(program) {
 }
 
 // Must be last optimization
-export function loopAssociater(program) {
+export function loopAssociater(program: $Iterable<Instruction,void,void>) {
   program = Array.from(program);
   const programLen = program.length;
   const opens = [];
@@ -237,8 +255,8 @@ export function loopAssociater(program) {
       if (openPc == null) {
         throw new Error('Unmatched ]');
       }
-      ins.pair = openPc;
-      program[openPc].pair = pc;
+      (ins:any).pair = openPc;
+      (program[openPc]:any).pair = pc;
     }
   }
   if (opens.length) {
@@ -247,7 +265,7 @@ export function loopAssociater(program) {
   return program;
 }
 
-export function parse(programString, enhanced=false) {
+export function parse(programString: string, enhanced: boolean=false) {
   if (typeof programString !== 'string') {
     throw new Error('argument must be string');
   }

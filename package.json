@@ -5,7 +5,8 @@
   "main": "js/index.js",
   "scripts": {
     "prepare": "babel -s inline -d js/ src/",
-    "test": "npm run lint && mocha",
+    "test": "npm run lint && npm run flow_check && mocha",
+    "flow_check": "flow check",
     "lint": "eslint .",
     "lint-fix": "eslint . --fix"
   },

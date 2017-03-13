@@ -1,6 +1,10 @@
+/* @flow */
+
 import once from 'lodash/once';
 import {parse, loopAssociater} from './parse';
+import type {Instruction} from './parse';
 import {makeReadFunction, makeWriteFunction, makeMemory} from './args';
+import type {ReadParam, WriteParam} from './args';
 
 const ADD = 0, RIGHT = 1,
   OUT = 2, IN = 3,
@@ -30,25 +34,25 @@ const warnAboutNoEval = once(() => {
   }
 });
 
-function scanLeft(memory, dc) {
+function scanLeft(memory: $TypedArray, dc: number): number {
   while (memory[dc]) {
     dc--;
   }
   return dc;
 }
 
-function scanRight(memory, dc) {
+function scanRight(memory: $TypedArray, dc: number): number {
   while (memory[dc]) {
     dc++;
   }
   return dc;
 }
 
-function manyfier(program) {
+function manyfier(program: Array<Instruction>) {
   const MAX_IN_MANY = 200;
 
-  function* _manyfier(program) {
-    let buffer = [];
+  function* _manyfier(program: Array<Instruction>) {
+    let buffer: Array<Instruction> = [];
 
     function* flush() {
       if (buffer.length > 1) {
@@ -100,7 +104,7 @@ function compile(program, registers, memory, write, read, EOF, useEval, noEvalWa
   }
   function INS_IN() {
     const value = read();
-    memory[registers[0]] = value === null ? EOF : (value|0);
+    memory[registers[0]] = value === null ? EOF : ((value:any)|0);
     return 1;
   }
   function INS_SCAN_LEFT() {
@@ -122,8 +126,8 @@ function compile(program, registers, memory, write, read, EOF, useEval, noEvalWa
   }
 
   function toSrc(ins) {
-    let x = ins.x|0;
-    let y = ins.y|0;
+    let x = (ins:any).x|0;
+    let y = (ins:any).y|0;
 
     switch (ins.type) {
     case ADD:
@@ -149,9 +153,9 @@ function compile(program, registers, memory, write, read, EOF, useEval, noEvalWa
   }
 
   function mapper(ins) {
-    const x = ins.x|0;
-    const y = ins.y|0;
-    const pair = ins.pair|0;
+    const x = (ins:any).x|0;
+    const y = (ins:any).y|0;
+    const pair = (ins:any).pair|0;
 
     switch (ins.type) {
     case ADD:
@@ -219,17 +223,40 @@ function compile(program, registers, memory, write, read, EOF, useEval, noEvalWa
   return program.map(mapper);
 }
 
+export type Options = {
+  cellSize?: ?number;
+  cellCount?: ?number;
+  read?: ReadParam;
+  write?: WriteParam;
+  EOF?: ?number;
+  useEval?: ?boolean;
+  noEvalWarning?: ?boolean;
+  code: string;
+};
+
 export class Machine {
-  constructor(options) {
+  _cellSize: number;
+  _cellCount: number;
+  _read: () => ?number;
+  _write: (value: number) => void;
+  _memory: $TypedArray;
+  _registers: Uint32Array;
+  _EOF: number;
+  _useEval: boolean;
+  _noEvalWarning: boolean;
+  _complete: boolean;
+  _program: any;
+
+  constructor(options: Options) {
     this._cellSize = options.cellSize || 8;
     this._cellCount = options.cellCount || 4096;
     this._read = makeReadFunction(options.read);
     this._write = makeWriteFunction(options.write);
     this._memory = makeMemory(this._cellSize, this._cellCount);
     this._registers = new Uint32Array(2);
-    this._EOF = ('EOF' in options) ? (options.EOF|0) : -1;
-    this._useEval = ('useEval' in options) ? options.useEval : true;
-    this._noEvalWarning = options.noEvalWarning;
+    this._EOF = ('EOF' in options) ? (Number(options.EOF)|0) : -1;
+    this._useEval = ('useEval' in options) ? !!options.useEval : true;
+    this._noEvalWarning = !!options.noEvalWarning;
     this._complete = false;
     this._program = compile(
       manyfier(parse(options.code)), this._registers, this._memory,
@@ -237,11 +264,12 @@ export class Machine {
     );
   }
 
-  get complete() {
+  complete: boolean;
+  /*:: _unused = ` */ get complete() {
     return this._complete;
-  }
+  }/*:: ` */
 
-  run(steps=Infinity) {
+  run(steps: number=Infinity) {
     const program = this._program;
     const registers = this._registers;
 

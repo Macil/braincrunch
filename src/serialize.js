@@ -1,16 +1,14 @@
+/* @flow */
+
+import type {Instruction} from './parse';
+
 const ADD = 0, RIGHT = 1,
   OUT = 2, IN = 3,
   OPEN = 4, CLOSE = 5,
   CLEAR = 6, MUL = 7,
   SCAN_LEFT = 8, SCAN_RIGHT = 9;
 
-function pushAll(dest, arr) {
-  for (let item of arr) {
-    dest.push(item);
-  }
-}
-
-function formatEnhancedNumber(x) {
+function formatEnhancedNumber(x: number): string {
   if (x < 0) {
     return '('+(-x)+')';
   } else {
@@ -18,7 +16,7 @@ function formatEnhancedNumber(x) {
   }
 }
 
-export function serialize(program, enhanced=false) {
+export function serialize(program: $Iterable<Instruction,void,void>, enhanced: boolean=false) {
   const mulBuffer = [];
   const bf = [];
   for (let ins of program) {
@@ -83,10 +81,10 @@ export function serialize(program, enhanced=false) {
         bf.push('[-');
         let position = 0;
         for (let mul of mulBuffer) {
-          pushAll(bf, serialize([{type: RIGHT, x: mul.x-position}, {type: ADD, x: mul.y}]));
+          bf.push(...serialize([{type: RIGHT, x: mul.x-position}, {type: ADD, x: mul.y}]));
           position = mul.x;
         }
-        pushAll(bf, serialize([{type: RIGHT, x: -position}]));
+        bf.push(...serialize([{type: RIGHT, x: -position}]));
         bf.push(']');
       }
       mulBuffer.length = 0;

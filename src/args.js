@@ -1,18 +1,20 @@
-export function makeReadFunction(read) {
+/* @flow */
+
+export type ReadParam = (() => number|null) | string | Array<number> | null | void;
+
+export function makeReadFunction(read: ReadParam): () => ?number {
   if (typeof read === 'function') {
     return read;
   } else if (typeof read === 'string') {
+    const s = read;
+    const sLen = s.length;
     let i = 0;
-    return () => {
-      const c = read.charCodeAt(i++);
-      return isNaN(c) ? null : c;
-    };
+    return () => i < sLen ? s.charCodeAt(i++) : null;
   } else if (Array.isArray(read)) {
-    const iter = read[Symbol.iterator]();
-    return () => {
-      const {value, done} = iter.next();
-      return done ? null : value;
-    };
+    const a = read;
+    const aLen = a.length;
+    let i = 0;
+    return () => i < aLen ? a[i++] : null;
   } else if (read == null) {
     return () => null;
   } else {
@@ -20,12 +22,15 @@ export function makeReadFunction(read) {
   }
 }
 
-export function makeWriteFunction(write) {
+export type WriteParam = ((value: number) => void) | Array<number> | null | void;
+
+export function makeWriteFunction(write: WriteParam): (value: number) => void {
   if (typeof write === 'function') {
     return write;
   } else if (Array.isArray(write)) {
+    const a = write;
     return n => {
-      write.push(n);
+      a.push(n);
     };
   } else if (write == null) {
     return () => {};
@@ -34,7 +39,7 @@ export function makeWriteFunction(write) {
   }
 }
 
-export function makeMemory(cellSize, cellCount) {
+export function makeMemory(cellSize: number, cellCount: number): $TypedArray {
   switch (cellSize) {
   case 8:
     return new Uint8Array(cellCount);

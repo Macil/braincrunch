@@ -1,3 +1,5 @@
+/* @flow */
+
 import assert from 'assert';
 
 import {parse} from '../src/parse';

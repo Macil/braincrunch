@@ -16,7 +16,7 @@ module.exports = {
   ],
   "rules": {
     "flowtype/define-flow-type": 1,
-    // "flowtype/require-valid-file-annotation": ["error", "always"],
+    "flowtype/require-valid-file-annotation": ["error", "always"],
 
     "indent": ["error", 2],
     "linebreak-style": ["error", "unix"],

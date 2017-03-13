@@ -1,3 +1,5 @@
+/* @flow */
+
 // Simpler alternative Machine implementation. Doesn't do any Javascript
 // compilation. Useful if you need `machine.run` to not over-step at all.
 
@@ -24,8 +26,21 @@ function scanRight(memory, dc) {
   return dc;
 }
 
+import type {Options} from './machine';
+
 export class SimpleMachine {
-  constructor(options) {
+  _cellSize: number;
+  _cellCount: number;
+  _read: Function;
+  _write: Function;
+  _memory: $TypedArray;
+  _pc: number;
+  _dc: number;
+  _EOF: number;
+  _program: any;
+  _complete: boolean;
+
+  constructor(options: Options) {
     this._cellSize = options.cellSize || 8;
     this._cellCount = options.cellCount || 4096;
     this._read = makeReadFunction(options.read);
@@ -33,16 +48,17 @@ export class SimpleMachine {
     this._memory = makeMemory(this._cellSize, this._cellCount);
     this._pc = 0;
     this._dc = 0;
-    this._EOF = ('EOF' in options) ? (options.EOF|0) : -1;
+    this._EOF = ('EOF' in options) ? (Number(options.EOF)|0) : -1;
     this._program = parse(options.code);
     this._complete = false;
   }
 
-  get complete() {
+  complete: boolean;
+  /*:: _unused = ` */ get complete() {
     return this._complete;
-  }
+  }/*:: ` */
 
-  run(steps=Infinity) {
+  run(steps: number=Infinity) {
     const program = this._program;
     const memory = this._memory;
     const EOF = this._EOF|0;
