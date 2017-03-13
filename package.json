@@ -4,7 +4,7 @@
   "description": "An embeddable performant Brainfuck interpreter",
   "main": "js/index.js",
   "scripts": {
-    "prepare": "babel -s inline -d js/ src/",
+    "prepare": "babel -s inline -d js/ src/ && flow-copy-source -v src js",
     "test": "npm run lint && npm run flow_check && mocha",
     "flow_check": "flow check",
     "lint": "eslint .",
