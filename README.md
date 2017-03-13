@@ -1,5 +1,8 @@
 # BrainCrunch
 
+[![Circle CI](https://circleci.com/gh/AgentME/braincrunch.svg?style=shield)](https://circleci.com/gh/AgentME/braincrunch)
+[![npm version](https://badge.fury.io/js/braincrunch.svg)](https://badge.fury.io/js/braincrunch)
+
 An embeddable performant Brainfuck interpreter written in Javascript.
 
     npm install --save braincrunch
