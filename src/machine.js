@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import once from 'lodash/once';
 import {parse, loopAssociater} from './parse';
 import {makeReadFunction, makeWriteFunction, makeMemory} from './args';
 
@@ -19,7 +19,7 @@ function checkEval() {
   return didEval;
 }
 
-const warnAboutNoEval = _.once(() => {
+const warnAboutNoEval = once(() => {
   if (typeof console !== 'undefined' && console.warn) {
     console.warn(
       'eval is not available. Braincrunch performance may suffer.\n' +
@@ -224,8 +224,8 @@ export class Machine {
     this._write = makeWriteFunction(options.write);
     this._memory = makeMemory(this._cellSize, this._cellCount);
     this._registers = new Uint32Array(2);
-    this._EOF = _.has(options, 'EOF') ? (options.EOF|0) : -1;
-    this._useEval = _.has(options, 'useEval') ? options.useEval : true;
+    this._EOF = ('EOF' in options) ? (options.EOF|0) : -1;
+    this._useEval = ('useEval' in options) ? options.useEval : true;
     this._noEvalWarning = options.noEvalWarning;
     this._complete = false;
     this._program = compile(

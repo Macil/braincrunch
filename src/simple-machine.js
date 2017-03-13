@@ -1,7 +1,6 @@
 // Simpler alternative Machine implementation. Doesn't do any Javascript
 // compilation. Useful if you need `machine.run` to not over-step at all.
 
-import _ from 'lodash';
 import {parse} from './parse';
 import {makeReadFunction, makeWriteFunction, makeMemory} from './args';
 
@@ -34,7 +33,7 @@ export class SimpleMachine {
     this._memory = makeMemory(this._cellSize, this._cellCount);
     this._pc = 0;
     this._dc = 0;
-    this._EOF = _.has(options, 'EOF') ? (options.EOF|0) : -1;
+    this._EOF = ('EOF' in options) ? (options.EOF|0) : -1;
     this._program = parse(options.code);
     this._complete = false;
   }

@@ -1,5 +1,7 @@
 import assert from 'assert';
-import _ from 'lodash';
+import includes from 'lodash/includes';
+import first from 'lodash/first';
+import last from 'lodash/last';
 
 const ADD = 0, RIGHT = 1,
   OUT = 2, IN = 3,
@@ -39,8 +41,8 @@ function* tokenize(programString) {
 }
 
 function parseEnhancedNumber(x) {
-  const hasStartParen = _.first(x) === '(';
-  const hasEndParen = _.last(x) === ')';
+  const hasStartParen = first(x) === '(';
+  const hasEndParen = last(x) === ')';
   if (hasStartParen !== hasEndParen) {
     throw new Error("Paren mismatch: "+x);
   }
@@ -132,7 +134,7 @@ function* contractProgram(program) {
     if (!prev) {
       prev = ins;
     } else {
-      if (prev.type === ins.type && _.includes(contractableInsTypes, ins.type)) {
+      if (prev.type === ins.type && includes(contractableInsTypes, ins.type)) {
         prev.x += ins.x;
       } else {
         yield prev;
