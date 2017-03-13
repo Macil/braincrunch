@@ -12,30 +12,30 @@ const ADD = 0, RIGHT = 1,
 function* tokenize(programString) {
   for (let opCode of programString) {
     switch (opCode) {
-      case '+':
-        yield {type: ADD, x: 1};
-        break;
-      case '-':
-        yield {type: ADD, x: -1};
-        break;
-      case '>':
-        yield {type: RIGHT, x: 1};
-        break;
-      case '<':
-        yield {type: RIGHT, x: -1};
-        break;
-      case '.':
-        yield {type: OUT};
-        break;
-      case ',':
-        yield {type: IN};
-        break;
-      case '[':
-        yield {type: OPEN};
-        break;
-      case ']':
-        yield {type: CLOSE};
-        break;
+    case '+':
+      yield {type: ADD, x: 1};
+      break;
+    case '-':
+      yield {type: ADD, x: -1};
+      break;
+    case '>':
+      yield {type: RIGHT, x: 1};
+      break;
+    case '<':
+      yield {type: RIGHT, x: -1};
+      break;
+    case '.':
+      yield {type: OUT};
+      break;
+    case ',':
+      yield {type: IN};
+      break;
+    case '[':
+      yield {type: OPEN};
+      break;
+    case ']':
+      yield {type: CLOSE};
+      break;
     }
   }
 }
@@ -44,7 +44,7 @@ function parseEnhancedNumber(x) {
   const hasStartParen = first(x) === '(';
   const hasEndParen = last(x) === ')';
   if (hasStartParen !== hasEndParen) {
-    throw new Error("Paren mismatch: "+x);
+    throw new Error('Paren mismatch: '+x);
   }
   if (hasStartParen) {
     return -x.slice(1, -1);
@@ -59,70 +59,71 @@ function* enhancedTokenize(programString) {
   for (let i = 0; i < programString.length; i++) {
     const opCode = programString[i];
     switch (opCode) {
-      case '+':
-        yield {type: ADD, x: 1};
-        break;
-      case '-':
-        yield {type: ADD, x: -1};
-        break;
-      case '>':
-        yield {type: RIGHT, x: 1};
-        break;
-      case '<':
-        yield {type: RIGHT, x: -1};
-        break;
-      case '.':
-        yield {type: OUT};
-        break;
-      case ',':
-        yield {type: IN};
-        break;
-      case '[':
-        yield {type: OPEN};
-        break;
-      case ']':
-        yield {type: CLOSE};
-        break;
-      case '^':
-        yield {type: CLEAR};
-        break;
-      case '*':
-        throw new Error("* must be preceded by num:num");
-      default:
-        const slice = programString.substr(i, 500);
-        const mulMatch = slice.match(/^(\(?\d+\)?):(\(?\d+\)?)\*/);
-        if (mulMatch) {
-          const x = parseEnhancedNumber(mulMatch[1]);
-          const y = parseEnhancedNumber(mulMatch[2]);
-          if (x === 0) {
-            throw new Error("mul instruction can't be used with x=0");
-          }
-          yield {type: MUL, x, y};
-          i += mulMatch[0].length-1;
-          break;
+    case '+':
+      yield {type: ADD, x: 1};
+      break;
+    case '-':
+      yield {type: ADD, x: -1};
+      break;
+    case '>':
+      yield {type: RIGHT, x: 1};
+      break;
+    case '<':
+      yield {type: RIGHT, x: -1};
+      break;
+    case '.':
+      yield {type: OUT};
+      break;
+    case ',':
+      yield {type: IN};
+      break;
+    case '[':
+      yield {type: OPEN};
+      break;
+    case ']':
+      yield {type: CLOSE};
+      break;
+    case '^':
+      yield {type: CLEAR};
+      break;
+    case '*':
+      throw new Error('* must be preceded by num:num');
+    default: {
+      const slice = programString.substr(i, 500);
+      const mulMatch = slice.match(/^(\(?\d+\)?):(\(?\d+\)?)\*/);
+      if (mulMatch) {
+        const x = parseEnhancedNumber(mulMatch[1]);
+        const y = parseEnhancedNumber(mulMatch[2]);
+        if (x === 0) {
+          throw new Error("mul instruction can't be used with x=0");
         }
-        const repeatedMatch = slice.match(/^(\(?\d+\)?)([+\-<>])/);
-        if (repeatedMatch) {
-          const num = parseEnhancedNumber(repeatedMatch[1]);
-          switch (repeatedMatch[2]) {
-            case '+':
-              yield {type: ADD, x: num};
-              break;
-            case '-':
-              yield {type: ADD, x: -num};
-              break;
-            case '>':
-              yield {type: RIGHT, x: num};
-              break;
-            case '<':
-              yield {type: RIGHT, x: -num};
-              break;
-            default:
-              throw new Error("Should not happen");
-          }
-          i += repeatedMatch[0].length-1;
+        yield {type: MUL, x, y};
+        i += mulMatch[0].length-1;
+        break;
+      }
+      const repeatedMatch = slice.match(/^(\(?\d+\)?)([+\-<>])/);
+      if (repeatedMatch) {
+        const num = parseEnhancedNumber(repeatedMatch[1]);
+        switch (repeatedMatch[2]) {
+        case '+':
+          yield {type: ADD, x: num};
           break;
+        case '-':
+          yield {type: ADD, x: -num};
+          break;
+        case '>':
+          yield {type: RIGHT, x: num};
+          break;
+        case '<':
+          yield {type: RIGHT, x: -num};
+          break;
+        default:
+          throw new Error('Should not happen');
         }
+        i += repeatedMatch[0].length-1;
+        break;
+      }
+    }
     }
   }
 }
@@ -234,21 +235,21 @@ export function loopAssociater(program) {
     } else if (ins.type === CLOSE) {
       const openPc = opens.pop();
       if (openPc == null) {
-        throw new Error("Unmatched ]");
+        throw new Error('Unmatched ]');
       }
       ins.pair = openPc;
       program[openPc].pair = pc;
     }
   }
   if (opens.length) {
-    throw new Error("Unmatched [");
+    throw new Error('Unmatched [');
   }
   return program;
 }
 
 export function parse(programString, enhanced=false) {
   if (typeof programString !== 'string') {
-    throw new Error("argument must be string");
+    throw new Error('argument must be string');
   }
   const tokens = (enhanced ? enhancedTokenize : tokenize)(programString);
   return loopAssociater(clearLoop(scanners(contractProgram(tokens))));

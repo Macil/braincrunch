@@ -15,13 +15,15 @@ function checkEval() {
   let didEval = false;
   try {
     didEval = (new Function('return true;'))();
-  } catch(e) {}
+  } catch (e) {
+    // ignore, expected if CSP blocks eval
+  }
   return didEval;
 }
 
 const warnAboutNoEval = once(() => {
-  if (typeof console !== 'undefined' && console.warn) {
-    console.warn(
+  if (typeof console !== 'undefined' && console.warn) { //eslint-disable-line no-console
+    console.warn( //eslint-disable-line no-console
       'eval is not available. Braincrunch performance may suffer.\n' +
       'You can use the noEvalWarning option to disable this message.'
     );
@@ -59,19 +61,19 @@ function manyfier(program) {
 
     for (let ins of program) {
       switch (buffer.length < MAX_IN_MANY && ins.type) {
-        case ADD:
-        case RIGHT:
-        case OUT:
-        case IN:
-        case CLEAR:
-        case MUL:
-        case SCAN_LEFT:
-        case SCAN_RIGHT:
-          buffer.push(ins);
-          break;
-        default:
-          yield* flush();
-          yield ins;
+      case ADD:
+      case RIGHT:
+      case OUT:
+      case IN:
+      case CLEAR:
+      case MUL:
+      case SCAN_LEFT:
+      case SCAN_RIGHT:
+        buffer.push(ins);
+        break;
+      default:
+        yield* flush();
+        yield ins;
       }
     }
     yield* flush();
@@ -124,25 +126,25 @@ function compile(program, registers, memory, write, read, EOF, useEval, noEvalWa
     let y = ins.y|0;
 
     switch (ins.type) {
-      case ADD:
-        return `memory[registers[0]] += ${x};`;
-      case CLEAR:
-        return `memory[registers[0]] = 0;`;
-      case MUL:
-        return `memory[registers[0] + ${x}] += (memory[registers[0]]|0)${y !== 1 ? ' * '+y : ''};`;
-      case RIGHT:
-        return `registers[0] += ${x};`;
-      case OUT:
-        return `write(memory[registers[0]]|0);`;
-      case IN:
-        return `var value = read();\n` +
-          `memory[registers[0]] = value === null ? EOF : (value|0);`;
-      case SCAN_LEFT:
-        return `registers[0] = scanLeft(memory, registers[0]);`;
-      case SCAN_RIGHT:
-        return `registers[0] = scanRight(memory, registers[0]);`;
-      default:
-        throw new Error("Not compilable type: "+ins.type);
+    case ADD:
+      return `memory[registers[0]] += ${x};`;
+    case CLEAR:
+      return 'memory[registers[0]] = 0;';
+    case MUL:
+      return `memory[registers[0] + ${x}] += (memory[registers[0]]|0)${y !== 1 ? ' * '+y : ''};`;
+    case RIGHT:
+      return `registers[0] += ${x};`;
+    case OUT:
+      return 'write(memory[registers[0]]|0);';
+    case IN:
+      return 'var value = read();\n' +
+          'memory[registers[0]] = value === null ? EOF : (value|0);';
+    case SCAN_LEFT:
+      return 'registers[0] = scanLeft(memory, registers[0]);';
+    case SCAN_RIGHT:
+      return 'registers[0] = scanRight(memory, registers[0]);';
+    default:
+      throw new Error('Not compilable type: '+ins.type);
     }
   }
 
@@ -152,64 +154,65 @@ function compile(program, registers, memory, write, read, EOF, useEval, noEvalWa
     const pair = ins.pair|0;
 
     switch (ins.type) {
-      case ADD:
-        return () => {
-          memory[registers[0]] += x;
-          return 1;
-        };
-      case CLEAR:
-        return INS_CLEAR;
-      case MUL:
-        return () => {
-          const dc = registers[0];
-          memory[dc + x] += (memory[dc]|0) * y;
-          return 1;
-        };
-      case RIGHT:
-        return () => {
-          registers[0] += x;
-          return 1;
-        };
-      case OUT:
-        return INS_OUT;
-      case IN:
-        return INS_IN;
-      case SCAN_LEFT:
-        return INS_SCAN_LEFT;
-      case SCAN_RIGHT:
-        return INS_SCAN_RIGHT;
-      case OPEN:
-        return () => {
-          if (!memory[registers[0]]) {
-            registers[1] = pair;
-          }
-          return 1;
-        };
-      case CLOSE:
-        return () => {
-          if (memory[registers[0]]) {
-            registers[1] = pair;
-          }
-          return 1;
-        };
-      case MANY:
-        if (canEval) {
-          return newFn(
+    case ADD:
+      return () => {
+        memory[registers[0]] += x;
+        return 1;
+      };
+    case CLEAR:
+      return INS_CLEAR;
+    case MUL:
+      return () => {
+        const dc = registers[0];
+        memory[dc + x] += (memory[dc]|0) * y;
+        return 1;
+      };
+    case RIGHT:
+      return () => {
+        registers[0] += x;
+        return 1;
+      };
+    case OUT:
+      return INS_OUT;
+    case IN:
+      return INS_IN;
+    case SCAN_LEFT:
+      return INS_SCAN_LEFT;
+    case SCAN_RIGHT:
+      return INS_SCAN_RIGHT;
+    case OPEN:
+      return () => {
+        if (!memory[registers[0]]) {
+          registers[1] = pair;
+        }
+        return 1;
+      };
+    case CLOSE:
+      return () => {
+        if (memory[registers[0]]) {
+          registers[1] = pair;
+        }
+        return 1;
+      };
+    case MANY: {
+      if (canEval) {
+        return newFn(
             ins.items.map(toSrc)
               .concat([`return ${ins.items.length};`])
               .join('\n')
           );
+      }
+      const fns = ins.items.map(mapper);
+      return () => {
+        const len = fns.length;
+        for (let i=0; i<len; i++) {
+          fns[i]();
         }
-        const fns = ins.items.map(mapper);
-        return () => {
-          const len = fns.length;
-          for (let i=0; i<len; i++) {
-            fns[i]();
-          }
-          return len;
-        };
-      default:
-        throw new Error("Unknown instruction type: "+ins.type);
+        return len;
+      };
+    }
+    default:
+      throw new Error('Unknown instruction type: '+ins.type);
     }
   }
 
@@ -240,7 +243,6 @@ export class Machine {
 
   run(steps=Infinity) {
     const program = this._program;
-    const memory = this._memory;
     const registers = this._registers;
 
     const programLen = program.length;

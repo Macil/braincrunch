@@ -60,41 +60,42 @@ export class SimpleMachine {
       }
       const ins = program[pc];
       switch (ins.type) {
-        case ADD:
-          memory[dc] += ins.x|0;
-          break;
-        case CLEAR:
-          memory[dc] = 0;
-          break;
-        case MUL:
-          memory[dc + (ins.x|0)] += (memory[dc]|0) * (ins.y|0);
-          break;
-        case RIGHT:
-          dc += ins.x|0;
-          break;
-        case OUT:
-          write(memory[dc]|0);
-          break;
-        case IN:
-          const value = read();
-          memory[dc] = value === null ? EOF : (value|0);
-          break;
-        case SCAN_LEFT:
-          dc = scanLeft(memory, dc);
-          break;
-        case SCAN_RIGHT:
-          dc = scanRight(memory, dc);
-          break;
-        case OPEN:
-          if (!memory[dc]) {
-            pc = ins.pair|0;
-          }
-          break;
-        case CLOSE:
-          if (memory[dc]) {
-            pc = ins.pair|0;
-          }
-          break;
+      case ADD:
+        memory[dc] += ins.x|0;
+        break;
+      case CLEAR:
+        memory[dc] = 0;
+        break;
+      case MUL:
+        memory[dc + (ins.x|0)] += (memory[dc]|0) * (ins.y|0);
+        break;
+      case RIGHT:
+        dc += ins.x|0;
+        break;
+      case OUT:
+        write(memory[dc]|0);
+        break;
+      case IN: {
+        const value = read();
+        memory[dc] = value === null ? EOF : (value|0);
+        break;
+      }
+      case SCAN_LEFT:
+        dc = scanLeft(memory, dc);
+        break;
+      case SCAN_RIGHT:
+        dc = scanRight(memory, dc);
+        break;
+      case OPEN:
+        if (!memory[dc]) {
+          pc = ins.pair|0;
+        }
+        break;
+      case CLOSE:
+        if (memory[dc]) {
+          pc = ins.pair|0;
+        }
+        break;
       }
       pc++;
       step++;

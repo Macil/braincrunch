@@ -16,7 +16,7 @@ export function makeReadFunction(read) {
   } else if (read == null) {
     return () => null;
   } else {
-    throw new Error("Invalid read option type");
+    throw new Error('Invalid read option type');
   }
 }
 
@@ -30,19 +30,19 @@ export function makeWriteFunction(write) {
   } else if (write == null) {
     return () => {};
   } else {
-    throw new Error("Invalid write option type");
+    throw new Error('Invalid write option type');
   }
 }
 
 export function makeMemory(cellSize, cellCount) {
   switch (cellSize) {
-    case 8:
-      return new Uint8Array(cellCount);
-    case 16:
-      return new Uint16Array(cellCount);
-    case 32:
-      return new Uint32Array(cellCount);
-    default:
-      throw new Error("Invalid cell size: "+cellSize);
+  case 8:
+    return new Uint8Array(cellCount);
+  case 16:
+    return new Uint16Array(cellCount);
+  case 32:
+    return new Uint32Array(cellCount);
+  default:
+    throw new Error('Invalid cell size: '+cellSize);
   }
 }

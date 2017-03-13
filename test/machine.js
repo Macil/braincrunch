@@ -6,7 +6,7 @@ import {SimpleMachine} from '../src/simple-machine';
 
 [Machine, SimpleMachine].forEach(Ctor => {
   describe(Ctor.name, function() {
-    it("works with basic program", function() {
+    it('works with basic program', function() {
       const output = [];
       const mac = new Ctor({
         code: '+.++.-.',
@@ -20,10 +20,10 @@ import {SimpleMachine} from '../src/simple-machine';
       assert.deepEqual(output, [1, 3, 2]);
     });
 
-    it("can work when eval is not available", sinon.test(function() {
+    it('can work when eval is not available', sinon.test(function() {
       {
         const fakeEval = () => {
-          throw new Error("eval is blocked by test");
+          throw new Error('eval is blocked by test');
         };
         this.stub(global, 'eval', fakeEval);
         this.stub(global, 'Function', fakeEval);
@@ -38,7 +38,7 @@ import {SimpleMachine} from '../src/simple-machine';
       assert.deepEqual(output, [1, 3, 2]);
     }));
 
-    it("can be set to not use eval", sinon.test(function() {
+    it('can be set to not use eval', sinon.test(function() {
       this.spy(global, 'Function');
 
       const output = [];
@@ -53,7 +53,7 @@ import {SimpleMachine} from '../src/simple-machine';
       assert(global.Function.notCalled);
     }));
 
-    it("works with Hello World", function() {
+    it('works with Hello World', function() {
       const HELLO_WORLD = '++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>' +
         '.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.';
 
@@ -68,7 +68,7 @@ import {SimpleMachine} from '../src/simple-machine';
       assert.strictEqual(output.join(''), 'Hello World!\n');
     });
 
-    it("can be run a few steps at a time", function() {
+    it('can be run a few steps at a time', function() {
       const HELLO_WORLD = '++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>' +
         '.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.';
 
