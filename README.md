@@ -1,7 +1,6 @@
 # BrainCrunch
 
-[![Circle CI](https://circleci.com/gh/AgentME/braincrunch.svg?style=shield)](https://circleci.com/gh/AgentME/braincrunch)
-[![npm version](https://badge.fury.io/js/braincrunch.svg)](https://badge.fury.io/js/braincrunch)
+[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/AgentME/braincrunch/blob/master/LICENSE.txt) [![npm version](https://img.shields.io/npm/v/braincrunch.svg?style=flat)](https://www.npmjs.com/package/braincrunch) [![CircleCI Status](https://circleci.com/gh/AgentME/braincrunch.svg?style=shield)](https://circleci.com/gh/AgentME/braincrunch)
 
 An embeddable performant Brainfuck interpreter written in Javascript.
 
