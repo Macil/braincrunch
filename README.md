@@ -5,7 +5,7 @@
 
 An embeddable performant Brainfuck interpreter written in Javascript.
 
-    npm install --save braincrunch
+    yarn add braincrunch
 
 ```javascript
 var braincrunch = require('braincrunch');
