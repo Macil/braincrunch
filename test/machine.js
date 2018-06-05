@@ -2,6 +2,8 @@
 
 import assert from 'assert';
 import sinon from 'sinon';
+import sinonTestFactory from 'sinon-test';
+const sinonTest = sinonTestFactory(sinon);
 
 import {Machine} from '../src/index.js';
 import {SimpleMachine} from '../src/simple-machine';
@@ -22,13 +24,13 @@ import {SimpleMachine} from '../src/simple-machine';
       assert.deepEqual(output, [1, 3, 2]);
     });
 
-    it('can work when eval is not available', sinon.test(function() {
+    it('can work when eval is not available', sinonTest(function() {
       {
         const fakeEval = () => {
           throw new Error('eval is blocked by test');
         };
-        this.stub(global, 'eval', fakeEval);
-        this.stub(global, 'Function', fakeEval);
+        this.stub(global, 'eval').callsFake(fakeEval);
+        this.stub(global, 'Function').callsFake(fakeEval);
       }
       const output = [];
       const mac = new Ctor({
@@ -40,7 +42,7 @@ import {SimpleMachine} from '../src/simple-machine';
       assert.deepEqual(output, [1, 3, 2]);
     }));
 
-    it('can be set to not use eval', sinon.test(function() {
+    it('can be set to not use eval', sinonTest(function() {
       this.spy(global, 'Function');
 
       const output = [];
