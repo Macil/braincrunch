@@ -2487,6 +2487,10 @@ signal-exit@^3.0.0, signal-exit@^3.0.2:
   version "3.0.2"
   resolved "https://registry.yarnpkg.com/signal-exit/-/signal-exit-3.0.2.tgz#b5fdc08f1287ea1178628e415e25132b73646c6d"
 
+sinon-test@^2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/sinon-test/-/sinon-test-2.2.0.tgz#ec4e07d1c5c0634f45c928863e5d28bd3dd1d9d3"
+
 sinon@^5.0.10:
   version "5.0.10"
   resolved "https://registry.yarnpkg.com/sinon/-/sinon-5.0.10.tgz#a282b36a7475664c9f98719108e5546907129023"
