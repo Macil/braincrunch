@@ -242,8 +242,8 @@ function* scanners(program) {
 }
 
 // Must be last optimization
-export function loopAssociater(program: $Iterable<Instruction,void,void>) {
-  program = Array.from(program);
+export function loopAssociater(program_: $Iterable<Instruction,void,void>) {
+  const program: Array<Instruction> = Array.from(program_);
   const programLen = program.length;
   const opens = [];
   for (let pc = 0; pc < programLen; pc++) {

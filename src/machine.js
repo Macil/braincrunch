@@ -117,8 +117,7 @@ function compile(program, registers, memory, write, read, EOF, useEval, noEvalWa
   }
 
   function newFn(src) {
-    // jshint evil:true
-    const fn = new Function(
+    const fn: Function = new Function(
       'registers', 'memory', 'program', 'write', 'read', 'EOF',
       'scanLeft', 'scanRight', src);
     return () =>
@@ -201,10 +200,10 @@ function compile(program, registers, memory, write, read, EOF, useEval, noEvalWa
     case MANY: {
       if (canEval) {
         return newFn(
-            ins.items.map(toSrc)
-              .concat([`return ${ins.items.length};`])
-              .join('\n')
-          );
+          ins.items.map(toSrc)
+            .concat([`return ${ins.items.length};`])
+            .join('\n')
+        );
       }
       const fns = ins.items.map(mapper);
       return () => {
