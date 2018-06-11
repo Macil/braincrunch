@@ -2491,9 +2491,9 @@ sinon-test@^2.2.0:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/sinon-test/-/sinon-test-2.2.0.tgz#ec4e07d1c5c0634f45c928863e5d28bd3dd1d9d3"
 
-sinon@^5.0.10:
-  version "5.0.10"
-  resolved "https://registry.yarnpkg.com/sinon/-/sinon-5.0.10.tgz#a282b36a7475664c9f98719108e5546907129023"
+sinon@^6.0.0:
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/sinon/-/sinon-6.0.0.tgz#f26627e4830dc34279661474da2c9e784f166215"
   dependencies:
     "@sinonjs/formatio" "^2.0.0"
     diff "^3.5.0"
