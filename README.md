@@ -32,7 +32,7 @@ Some of the optimization strategies are inspired by this post:
 http://calmerthanyouare.org/2015/01/07/optimizing-brainfuck.html
 
 BrainCrunch can be used in Browsers via a CommonJS bundler such as Browserify.
-Support for Typed Arrays is required. http://caniuse.com/#feat=typedarrays
+Support for Typed Arrays is required. https://caniuse.com/#feat=typedarrays
 
 ## API
 
