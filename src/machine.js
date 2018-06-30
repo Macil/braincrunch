@@ -263,10 +263,9 @@ export class Machine {
     );
   }
 
-  complete: boolean;
-  /*:: _unused = ` */ get complete() {
+  get complete(): boolean {
     return this._complete;
-  }/*:: ` */
+  }
 
   run(steps: number=Infinity) {
     const program = this._program;
