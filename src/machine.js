@@ -4,7 +4,8 @@ import once from 'lodash/once';
 import {parse, loopAssociater} from './parse';
 import type {Instruction} from './parse';
 import {makeReadFunction, makeWriteFunction, makeMemory} from './args';
-import type {ReadParam, WriteParam} from './args';
+import type {ReadParam, ReadResult, WriteParam, WriteResult} from './args';
+import {Interrupt} from './interrupt';
 
 const ADD = 0, RIGHT = 1,
   OUT = 2, IN = 3,
@@ -48,7 +49,7 @@ function scanRight(memory: $TypedArray, dc: number): number {
   return dc;
 }
 
-function manyfier(program: Array<Instruction>) {
+function manyfier(program: Array<Instruction>, allowInterrupts: boolean) {
   const MAX_IN_MANY = 200;
 
   function* _manyfier(program: Array<Instruction>) {
@@ -67,14 +68,19 @@ function manyfier(program: Array<Instruction>) {
       switch (buffer.length < MAX_IN_MANY && ins.type) {
       case ADD:
       case RIGHT:
-      case OUT:
-      case IN:
       case CLEAR:
       case MUL:
       case SCAN_LEFT:
       case SCAN_RIGHT:
         buffer.push(ins);
         break;
+      case OUT:
+      case IN:
+        if (!allowInterrupts) {
+          buffer.push(ins);
+          break;
+        }
+        // fall through
       default:
         yield* flush();
         yield ins;
@@ -86,7 +92,13 @@ function manyfier(program: Array<Instruction>) {
   return loopAssociater(_manyfier(program));
 }
 
-function compile(program, registers, memory, write, read, EOF, useEval, noEvalWarning) {
+function compile(
+  program, registers, memory, write, read,
+  EOF: number,
+  useEval: boolean,
+  noEvalWarning: boolean,
+  INTERRUPT: Interrupt
+) {
   const canEval = useEval && checkEval();
   if (useEval && !canEval && !noEvalWarning) {
     warnAboutNoEval();
@@ -94,17 +106,25 @@ function compile(program, registers, memory, write, read, EOF, useEval, noEvalWa
 
   // registers[0]: dc
   // registers[1]: pc
+  // registers[2]: interrupt
   function INS_CLEAR() {
     memory[registers[0]] = 0;
     return 1;
   }
   function INS_OUT() {
-    write(memory[registers[0]]|0);
+    if (write(memory[registers[0]]|0) === INTERRUPT) {
+      registers[2] = 1;
+    }
     return 1;
   }
   function INS_IN() {
     const value = read();
-    memory[registers[0]] = value === null ? EOF : ((value:any)|0);
+    if (value === INTERRUPT) {
+      registers[2] = 1;
+      memory[registers[0]] = 0;
+    } else {
+      memory[registers[0]] = value === null ? EOF : (value:any|0);
+    }
     return 1;
   }
   function INS_SCAN_LEFT() {
@@ -231,13 +251,14 @@ export type Options = {
   useEval?: ?boolean;
   noEvalWarning?: ?boolean;
   code: string;
+  allowInterrupts?: ?boolean;
 };
 
 export class Machine {
   _cellSize: number;
   _cellCount: number;
-  _read: () => ?number;
-  _write: (value: number) => void;
+  _read: () => ReadResult;
+  _write: (value: number) => WriteResult;
   _memory: $TypedArray;
   _registers: Uint32Array;
   _EOF: number;
@@ -245,6 +266,9 @@ export class Machine {
   _noEvalWarning: boolean;
   _complete: boolean;
   _program: any;
+  _allowInterrupts: boolean;
+
+  INTERRUPT = new Interrupt();
 
   constructor(options: Options) {
     this._cellSize = options.cellSize || 8;
@@ -252,14 +276,18 @@ export class Machine {
     this._read = makeReadFunction(options.read);
     this._write = makeWriteFunction(options.write);
     this._memory = makeMemory(this._cellSize, this._cellCount);
-    this._registers = new Uint32Array(2);
+    this._registers = new Uint32Array(3);
     this._EOF = ('EOF' in options) ? (Number(options.EOF)|0) : -1;
     this._useEval = ('useEval' in options) ? !!options.useEval : true;
     this._noEvalWarning = !!options.noEvalWarning;
+    this._allowInterrupts = typeof options.allowInterrupts === 'boolean' ?
+      options.allowInterrupts : true;
     this._complete = false;
     this._program = compile(
-      manyfier(parse(options.code)), this._registers, this._memory,
-      this._write, this._read, this._EOF, this._useEval, this._noEvalWarning
+      manyfier(parse(options.code), this._allowInterrupts),
+      this._registers, this._memory,
+      this._write, this._read, this._EOF, this._useEval, this._noEvalWarning,
+      this.INTERRUPT
     );
   }
 
@@ -270,10 +298,12 @@ export class Machine {
   run(steps: number=Infinity) {
     const program = this._program;
     const registers = this._registers;
+    registers[2] = 0;
 
     const programLen = program.length;
     let step = 0;
-    while (step < steps) {
+
+    while (step < steps && registers[2] === 0) {
       if (registers[1] >= programLen) {
         this._complete = true;
         break;
@@ -284,5 +314,9 @@ export class Machine {
     }
 
     return step;
+  }
+
+  setReadValue(value: number) {
+    this._memory[this._registers[0]] = value;
   }
 }

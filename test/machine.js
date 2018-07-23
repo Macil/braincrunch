@@ -225,6 +225,29 @@ import {SimpleMachine} from '../src/simple-machine';
           mac.run();
           assert.deepEqual(output, [255, 255, 255, 255]);
         });
+
+        it('can interrupt', function() {
+          let i = 0;
+          const output = [];
+          const mac = new Ctor({
+            code: ',.>,.>,.>,.',
+            read() {
+              const charCode = 'A_c'.charCodeAt(i++);
+              if (i == 2) return mac.INTERRUPT;
+              if (Number.isNaN(charCode)) return null;
+              return charCode;
+            },
+            write: output
+          });
+          mac.run();
+          assert.strictEqual(mac.complete, false);
+          assert.deepEqual(output, [65]);
+          mac.setReadValue('b'.charCodeAt(0));
+
+          mac.run();
+          assert.strictEqual(mac.complete, true);
+          assert.deepEqual(output, [65, 98, 99, 255]);
+        });
       });
 
       describe('write', function() {
@@ -260,6 +283,27 @@ import {SimpleMachine} from '../src/simple-machine';
           assert(readSpy.notCalled);
           mac.run();
           assert(readSpy.calledThrice);
+        });
+
+        it('can interrupt', function() {
+          const output = [];
+          const mac = new Ctor({
+            code: ',.>,.>,.>,.',
+            read: 'Abc',
+            write(value: number) {
+              output.push(value);
+              if (output.length === 1) {
+                return mac.INTERRUPT;
+              }
+            }
+          });
+          mac.run();
+          assert.strictEqual(mac.complete, false);
+          assert.deepEqual(output, [65]);
+
+          mac.run();
+          assert.strictEqual(mac.complete, true);
+          assert.deepEqual(output, [65, 98, 99, 255]);
         });
       });
     });

@@ -5,6 +5,8 @@
 
 import {parse} from './parse';
 import {makeReadFunction, makeWriteFunction, makeMemory} from './args';
+import type {ReadResult, WriteResult} from './args';
+import {Interrupt} from './interrupt';
 
 const ADD = 0, RIGHT = 1,
   OUT = 2, IN = 3,
@@ -31,14 +33,16 @@ import type {Options} from './machine';
 export class SimpleMachine {
   _cellSize: number;
   _cellCount: number;
-  _read: Function;
-  _write: Function;
+  _read: () => ReadResult;
+  _write: (value: number) => WriteResult;
   _memory: $TypedArray;
   _pc: number;
   _dc: number;
   _EOF: number;
   _program: any;
   _complete: boolean;
+
+  INTERRUPT = new Interrupt();
 
   constructor(options: Options) {
     this._cellSize = options.cellSize || 8;
@@ -68,7 +72,8 @@ export class SimpleMachine {
 
     const programLen = program.length;
     let step = 0;
-    while (step < steps) {
+    let interrupt = false;
+    while (step < steps && !interrupt) {
       if (pc >= programLen) {
         this._complete = true;
         break;
@@ -88,11 +93,18 @@ export class SimpleMachine {
         dc += ins.x|0;
         break;
       case OUT:
-        write(memory[dc]|0);
+        if (write(memory[dc]|0) === this.INTERRUPT) {
+          interrupt = true;
+        }
         break;
       case IN: {
         const value = read();
-        memory[dc] = value === null ? EOF : (value|0);
+        if (value === this.INTERRUPT) {
+          interrupt = true;
+          memory[dc] = 0;
+        } else {
+          memory[dc] = value === null ? EOF : (value:any|0);
+        }
         break;
       }
       case SCAN_LEFT:
@@ -120,5 +132,9 @@ export class SimpleMachine {
     this._pc = pc;
 
     return step;
+  }
+
+  setReadValue(value: number) {
+    this._memory[this._dc] = value;
   }
 }

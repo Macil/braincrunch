@@ -1,8 +1,11 @@
 /* @flow */
 
-export type ReadParam = (() => number|null) | string | Array<number> | null | void;
+import type {Interrupt} from './interrupt';
 
-export function makeReadFunction(read: ReadParam): () => ?number {
+export type ReadResult = number|null|Interrupt;
+export type ReadParam = (() => ReadResult) | string | Array<number> | null | void;
+
+export function makeReadFunction(read: ReadParam): () => ReadResult {
   if (typeof read === 'function') {
     return read;
   } else if (typeof read === 'string') {
@@ -22,9 +25,10 @@ export function makeReadFunction(read: ReadParam): () => ?number {
   }
 }
 
-export type WriteParam = ((value: number) => void) | Array<number> | null | void;
+export type WriteResult = void | Interrupt;
+export type WriteParam = ((value: number) => WriteResult) | Array<number> | null | void;
 
-export function makeWriteFunction(write: WriteParam): (value: number) => void {
+export function makeWriteFunction(write: WriteParam): (value: number) => WriteResult {
   if (typeof write === 'function') {
     return write;
   } else if (Array.isArray(write)) {
