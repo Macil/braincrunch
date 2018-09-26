@@ -14,10 +14,10 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/AgentME/braincrunch.git"
+    "url": "https://github.com/Macil/braincrunch.git"
   },
   "bugs": {
-    "url": "https://github.com/AgentME/braincrunch/issues"
+    "url": "https://github.com/Macil/braincrunch/issues"
   },
   "keywords": [
     "brainfuck",

@@ -1,6 +1,6 @@
 # BrainCrunch
 
-[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/AgentME/braincrunch/blob/master/LICENSE.txt) [![npm version](https://img.shields.io/npm/v/braincrunch.svg?style=flat)](https://www.npmjs.com/package/braincrunch) [![CircleCI Status](https://circleci.com/gh/AgentME/braincrunch.svg?style=shield)](https://circleci.com/gh/AgentME/braincrunch) [![Greenkeeper badge](https://badges.greenkeeper.io/AgentME/braincrunch.svg)](https://greenkeeper.io/)
+[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/Macil/braincrunch/blob/master/LICENSE.txt) [![npm version](https://img.shields.io/npm/v/braincrunch.svg?style=flat)](https://www.npmjs.com/package/braincrunch) [![CircleCI Status](https://circleci.com/gh/Macil/braincrunch.svg?style=shield)](https://circleci.com/gh/Macil/braincrunch) [![Greenkeeper badge](https://badges.greenkeeper.io/Macil/braincrunch.svg)](https://greenkeeper.io/)
 
 An embeddable performant Brainfuck interpreter written in Javascript.
 
