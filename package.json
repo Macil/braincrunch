@@ -44,5 +44,10 @@
     "rimraf": "^2.6.2",
     "sinon": "^6.0.0",
     "sinon-test": "^2.2.0"
+  },
+  "greenkeeper": {
+    "ignore": [
+      "flow-bin"
+    ]
   }
 }
