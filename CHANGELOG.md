@@ -1,3 +1,7 @@
+## 1.2.1 (2018-09-26)
+
+* Upgraded to Babel 7.
+
 ## 1.2.0 (2017-07-23)
 
 * Added interrupt support to read and write callbacks so asynchronous reads and
