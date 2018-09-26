@@ -1,6 +1,6 @@
 {
   "name": "braincrunch",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "An embeddable performant Brainfuck interpreter",
   "main": "js/index.js",
   "sideEffects": false,
