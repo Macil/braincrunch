@@ -168,6 +168,7 @@ function* contractProgram(program) {
 
 // Needs to run after contractProgram for best effectiveness.
 function* clearLoop(program) {
+  /* eslint-disable require-atomic-updates */
   const buffer = [];
   const mulBuffer = [];
   let copyPos = 0;

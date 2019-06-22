@@ -53,6 +53,7 @@ function manyfier(program: Array<Instruction>, allowInterrupts: boolean) {
   const MAX_IN_MANY = 200;
 
   function* _manyfier(program: Array<Instruction>) {
+    /* eslint-disable require-atomic-updates */
     let buffer: Array<Instruction> = [];
 
     function* flush() {
